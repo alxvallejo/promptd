@@ -1,7 +1,8 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Plus, Folder, MessageSquare, Settings, Moon, Sun, User, LogOut, Palette, Star } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { useTheme, type ColorScheme } from '../context/ThemeContext'
+import { supabase } from '../lib/supabase'
 
 interface SidebarProps {
   folders: Array<{ id: string; name: string }>
@@ -28,6 +29,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const { signOut, user } = useAuth()
   const { isDark, toggleTheme, fontFamily, setFontFamily, colorScheme, setColorScheme } = useTheme()
+  const [userFirstName, setUserFirstName] = useState<string | null>(null)
 
   const fontOptions = [
     { value: 'font-inter', label: 'Inter' },
@@ -41,6 +43,33 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { value: 'vscode', label: 'VS Code', description: 'Developer-friendly' },
     { value: 'minimal', label: 'Minimal', description: 'Simple and elegant' },
   ]
+
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (!user?.id) return
+
+      try {
+        const { data: profile, error } = await supabase
+          .from('profiles')
+          .select('first_name')
+          .eq('id', user.id)
+          .single()
+
+        if (error) {
+          console.error('Error fetching user profile:', error)
+          return
+        }
+
+        setUserFirstName(profile?.first_name || null)
+      } catch (error) {
+        console.error('Error fetching user profile:', error)
+      }
+    }
+
+    fetchUserProfile()
+  }, [user?.id])
+
+  const displayName = userFirstName || user?.email?.split('@')[0] || 'User'
 
   return (
     <div className="w-64 h-screen flex flex-col" style={{ 
@@ -156,7 +185,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           
           <div className="sidebar-item">
             <User size={18} />
-            <span className="truncate">{user?.email}</span>
+            <span className="truncate">{displayName}</span>
           </div>
           
           <button

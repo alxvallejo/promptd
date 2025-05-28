@@ -16,7 +16,7 @@ interface Pick {
   linkPreviews: LinkPreview[]
   weekOf: string
   userId: string
-  userEmail?: string
+  userFirstName?: string
   createdAt: Date
 }
 
@@ -45,39 +45,19 @@ export const WeeklyPicks: React.FC<WeeklyPicksProps> = ({ currentWeek }) => {
     try {
       setLoading(true)
       
-      // First, try to load picks for the current week from all users
+      // Load picks for the current week from all users with user profile information
       const { data: picksData, error } = await supabase
         .from('picks')
-        .select('*')
+        .select(`
+          *,
+          profiles!inner(first_name)
+        `)
         .eq('week_of', currentWeek)
         .order('created_at', { ascending: false })
 
       if (error) {
         console.error('Error loading weekly picks:', error)
         return
-      }
-
-      // Get unique user IDs from picks
-      const userIds = [...new Set(picksData?.map(pick => pick.user_id) || [])]
-      
-      // Get user emails from auth.users (this requires RLS to be configured properly)
-      const userEmails: { [key: string]: string } = {}
-      
-      if (userIds.length > 0) {
-        try {
-          // Try to get user data - this might not work depending on RLS setup
-          const { data: userData } = await supabase.auth.admin.listUsers()
-          
-          if (userData?.users) {
-            userData.users.forEach(user => {
-              if (userIds.includes(user.id)) {
-                userEmails[user.id] = user.email || 'Anonymous'
-              }
-            })
-          }
-        } catch (error) {
-          console.log('Could not fetch user emails, using anonymous names')
-        }
       }
 
       const formattedPicks = picksData?.map(pick => ({
@@ -87,7 +67,7 @@ export const WeeklyPicks: React.FC<WeeklyPicksProps> = ({ currentWeek }) => {
         linkPreviews: pick.link_previews || [],
         weekOf: pick.week_of,
         userId: pick.user_id,
-        userEmail: userEmails[pick.user_id] || 'Anonymous User',
+        userFirstName: pick.profiles?.first_name || 'Anonymous User',
         createdAt: new Date(pick.created_at),
       })) || []
 
@@ -212,7 +192,7 @@ export const WeeklyPicks: React.FC<WeeklyPicksProps> = ({ currentWeek }) => {
                       <span style={{ color: 'var(--color-text-muted)' }}>•</span>
                       <div className="flex items-center gap-1" style={{ color: 'var(--color-text-secondary)' }}>
                         <User size={14} />
-                        <span className="text-sm">{pick.userEmail}</span>
+                        <span className="text-sm">{pick.userFirstName}</span>
                       </div>
                     </div>
                     <div className="text-xs" style={{ color: 'var(--color-text-muted)' }}>

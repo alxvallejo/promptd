@@ -18,6 +18,35 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
 export type Database = {
   public: {
     Tables: {
+      profiles: {
+        Row: {
+          id: string
+          first_name: string | null
+          last_name: string | null
+          email: string | null
+          avatar_url: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id: string
+          first_name?: string | null
+          last_name?: string | null
+          email?: string | null
+          avatar_url?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          first_name?: string | null
+          last_name?: string | null
+          email?: string | null
+          avatar_url?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
       folders: {
         Row: {
           id: string
@@ -65,6 +94,38 @@ export type Database = {
           title?: string
           content?: string
           folder_id?: string | null
+          user_id?: string
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      picks: {
+        Row: {
+          id: string
+          category: string
+          content: string
+          link_previews: any
+          week_of: string
+          user_id: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          category: string
+          content: string
+          link_previews?: any
+          week_of: string
+          user_id: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          category?: string
+          content?: string
+          link_previews?: any
+          week_of?: string
           user_id?: string
           created_at?: string
           updated_at?: string

@@ -7,6 +7,8 @@ A beautiful prompt journal application with ChatGPT-like interface, built with R
 ## ✨ Features
 
 - 🔐 **Google Authentication** - Secure login via Google OAuth
+- 👤 **User Profiles** - Automatic profile creation with first names from Google OAuth
+- 🌟 **Weekly Picks** - Share and discover community recommendations
 - 🌙 **Dark Mode** - Beautiful dark/light theme toggle
 - 🎨 **Modern Fonts** - Choose from 4 professional font families
 - 📁 **Folder Organization** - Create folders to organize your prompts
@@ -45,6 +47,8 @@ npm install
 2. In your Supabase dashboard, go to SQL Editor
 3. Copy and paste the contents of `supabase-schema.sql`
 4. Run the query to create tables and policies
+
+**Note**: The schema now includes a `profiles` table that automatically extracts user first names from Google OAuth metadata. This fixes the issue where picks showed "Anonymous User" instead of actual names.
 
 ### 4. Configure authentication
 
@@ -92,21 +96,33 @@ src/
 ├── components/
 │   ├── Auth.tsx          # Google authentication
 │   ├── Sidebar.tsx       # Navigation and folders
-│   └── ChatInterface.tsx # Chat UI
+│   ├── ChatInterface.tsx # Chat UI
+│   ├── Picks.tsx         # Weekly picks interface
+│   └── WeeklyPicks.tsx   # Community picks display
 ├── context/
 │   ├── AuthContext.tsx   # User authentication
 │   └── ThemeContext.tsx  # Dark mode & fonts
 ├── lib/
-│   └── supabase.ts       # Database client
+│   ├── supabase.ts       # Database client
+│   └── setupDatabase.ts  # Database setup utilities
 └── index.css             # Custom styles
 ```
 
 ## 🔒 Security
 
 - Row Level Security (RLS) enabled on all tables
-- Users can only access their own data
+- Users can only access their own data (except picks which are public)
 - Google OAuth for secure authentication
 - Environment variables for sensitive data
+- Automatic user profile creation with data extraction from OAuth metadata
+
+## 🆕 Recent Updates
+
+### User Profiles & First Names
+- Added automatic user profile creation when users sign up with Google OAuth
+- User first names are now extracted from Google profile data and displayed instead of "Anonymous User"
+- The sidebar now shows the user's first name instead of their email address
+- Existing users will have their profiles populated automatically when the new schema is applied
 
 ## 🤝 Contributing
 
