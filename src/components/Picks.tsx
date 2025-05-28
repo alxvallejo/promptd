@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { Send, Film, Tv, Gamepad2, Calendar, MoreHorizontal, X, ExternalLink } from 'lucide-react'
+import { WeeklyPicks } from './WeeklyPicks'
 
 interface LinkPreview {
   url: string
@@ -34,6 +35,7 @@ export const Picks: React.FC<PicksProps> = ({ onSavePick }) => {
   const [selectedCategory, setSelectedCategory] = useState('movies')
   const [inputValue, setInputValue] = useState('')
   const [linkPreviews, setLinkPreviews] = useState<LinkPreview[]>([])
+  const [refreshKey, setRefreshKey] = useState(0)
   const inputRef = useRef<HTMLTextAreaElement>(null)
 
   // Get current week string
@@ -146,18 +148,24 @@ export const Picks: React.FC<PicksProps> = ({ onSavePick }) => {
     setLinkPreviews(prev => prev.filter(preview => urls.includes(preview.url)))
   }
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!inputValue.trim()) return
 
-    onSavePick({
-      category: selectedCategory,
-      content: inputValue.trim(),
-      linkPreviews: linkPreviews.filter(p => !p.loading),
-      weekOf: currentWeek,
-    })
+    try {
+      await onSavePick({
+        category: selectedCategory,
+        content: inputValue.trim(),
+        linkPreviews: linkPreviews.filter(p => !p.loading),
+        weekOf: currentWeek,
+      })
 
-    setInputValue('')
-    setLinkPreviews([])
+      setInputValue('')
+      setLinkPreviews([])
+      // Trigger refresh of weekly picks
+      setRefreshKey(prev => prev + 1)
+    } catch (error) {
+      console.error('Error saving pick:', error)
+    }
   }
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -230,97 +238,111 @@ export const Picks: React.FC<PicksProps> = ({ onSavePick }) => {
         </div>
       </div>
 
-      {/* Content Area */}
-      <div className="flex-1 overflow-y-auto p-6 space-y-4" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
-        {/* Link Previews */}
-        {linkPreviews.length > 0 && (
-          <div className="space-y-3">
-            {linkPreviews.map((preview) => (
-              <div
-                key={preview.url}
-                className="card p-4 flex gap-4 relative"
-              >
-                <button
-                  onClick={() => removeLinkPreview(preview.url)}
-                  className="absolute top-2 right-2 p-1 rounded-full transition-colors"
-                  style={{ 
-                    color: 'var(--color-text-muted)',
-                    backgroundColor: 'var(--color-bg-tertiary)'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.color = 'var(--color-warning)'
-                    e.currentTarget.style.backgroundColor = 'var(--color-bg)'
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.color = 'var(--color-text-muted)'
-                    e.currentTarget.style.backgroundColor = 'var(--color-bg-tertiary)'
-                  }}
-                >
-                  <X size={14} />
-                </button>
+      {/* Content Area - Split between input/previews and weekly picks */}
+      <div className="flex-1 overflow-y-auto" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6 h-full">
+          {/* Left Column - Input and Link Previews */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold" style={{ color: 'var(--color-text)' }}>
+              Share Your Pick
+            </h3>
+            
+            {/* Link Previews */}
+            {linkPreviews.length > 0 && (
+              <div className="space-y-3">
+                {linkPreviews.map((preview) => (
+                  <div
+                    key={preview.url}
+                    className="card p-4 flex gap-4 relative"
+                  >
+                    <button
+                      onClick={() => removeLinkPreview(preview.url)}
+                      className="absolute top-2 right-2 p-1 rounded-full transition-colors"
+                      style={{ 
+                        color: 'var(--color-text-muted)',
+                        backgroundColor: 'var(--color-bg-tertiary)'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.color = 'var(--color-warning)'
+                        e.currentTarget.style.backgroundColor = 'var(--color-bg)'
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.color = 'var(--color-text-muted)'
+                        e.currentTarget.style.backgroundColor = 'var(--color-bg-tertiary)'
+                      }}
+                    >
+                      <X size={14} />
+                    </button>
 
-                {preview.loading ? (
-                  <div className="flex items-center gap-3">
-                    <div className="w-16 h-16 rounded-lg animate-pulse" style={{ backgroundColor: 'var(--color-bg-tertiary)' }} />
-                    <div className="flex-1">
-                      <div className="h-4 rounded animate-pulse mb-2" style={{ backgroundColor: 'var(--color-bg-tertiary)' }} />
-                      <div className="h-3 rounded animate-pulse w-2/3" style={{ backgroundColor: 'var(--color-bg-tertiary)' }} />
-                    </div>
-                  </div>
-                ) : (
-                  <>
-                    {preview.image && (
-                      <img
-                        src={preview.image}
-                        alt={preview.title}
-                        className="w-16 h-16 object-cover rounded-lg"
-                      />
+                    {preview.loading ? (
+                      <div className="flex items-center gap-3">
+                        <div className="w-16 h-16 rounded-lg animate-pulse" style={{ backgroundColor: 'var(--color-bg-tertiary)' }} />
+                        <div className="flex-1">
+                          <div className="h-4 rounded animate-pulse mb-2" style={{ backgroundColor: 'var(--color-bg-tertiary)' }} />
+                          <div className="h-3 rounded animate-pulse w-2/3" style={{ backgroundColor: 'var(--color-bg-tertiary)' }} />
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        {preview.image && (
+                          <img
+                            src={preview.image}
+                            alt={preview.title}
+                            className="w-16 h-16 object-cover rounded-lg"
+                          />
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-medium truncate" style={{ color: 'var(--color-text)' }}>
+                            {preview.title || 'Link Preview'}
+                          </h4>
+                          {preview.description && (
+                            <p className="text-sm mt-1 line-clamp-2" style={{ color: 'var(--color-text-secondary)' }}>
+                              {preview.description}
+                            </p>
+                          )}
+                          <a
+                            href={preview.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 text-xs mt-2 transition-colors"
+                            style={{ color: 'var(--color-accent)' }}
+                            onMouseEnter={(e) => e.currentTarget.style.textDecoration = 'underline'}
+                            onMouseLeave={(e) => e.currentTarget.style.textDecoration = 'none'}
+                          >
+                            <ExternalLink size={12} />
+                            Visit Link
+                          </a>
+                        </div>
+                      </>
                     )}
-                    <div className="flex-1 min-w-0">
-                      <h4 className="font-medium truncate" style={{ color: 'var(--color-text)' }}>
-                        {preview.title || 'Link Preview'}
-                      </h4>
-                      {preview.description && (
-                        <p className="text-sm mt-1 line-clamp-2" style={{ color: 'var(--color-text-secondary)' }}>
-                          {preview.description}
-                        </p>
-                      )}
-                      <a
-                        href={preview.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-xs mt-2 transition-colors"
-                        style={{ color: 'var(--color-accent)' }}
-                        onMouseEnter={(e) => e.currentTarget.style.textDecoration = 'underline'}
-                        onMouseLeave={(e) => e.currentTarget.style.textDecoration = 'none'}
-                      >
-                        <ExternalLink size={12} />
-                        Visit Link
-                      </a>
-                    </div>
-                  </>
-                )}
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        )}
+            )}
 
-        {/* Welcome message when no content */}
-        {linkPreviews.length === 0 && !inputValue && (
-          <div className="flex items-center justify-center h-full">
-            <div className="text-center max-w-md">
-              <div className="mb-4">
-                {selectedCategoryData && <selectedCategoryData.icon size={48} style={{ color: 'var(--color-accent)', margin: '0 auto' }} />}
+            {/* Welcome message when no content */}
+            {linkPreviews.length === 0 && !inputValue && (
+              <div className="flex items-center justify-center h-48">
+                <div className="text-center max-w-md">
+                  <div className="mb-4">
+                    {selectedCategoryData && <selectedCategoryData.icon size={48} style={{ color: 'var(--color-accent)', margin: '0 auto' }} />}
+                  </div>
+                  <h4 className="text-xl font-bold mb-2" style={{ color: 'var(--color-text)' }}>
+                    {selectedCategoryData?.label} Pick
+                  </h4>
+                  <p style={{ color: 'var(--color-text-secondary)' }}>
+                    Share your weekly {selectedCategoryData?.label.toLowerCase()} pick below
+                  </p>
+                </div>
               </div>
-              <h3 className="text-2xl font-bold mb-4" style={{ color: 'var(--color-text)' }}>
-                {selectedCategoryData?.label} Pick
-              </h3>
-              <p className="text-lg" style={{ color: 'var(--color-text-secondary)' }}>
-                Share your weekly {selectedCategoryData?.label.toLowerCase()} pick below
-              </p>
-            </div>
+            )}
           </div>
-        )}
+
+          {/* Right Column - Weekly Picks */}
+          <div>
+            <WeeklyPicks key={refreshKey} currentWeek={currentWeek} />
+          </div>
+        </div>
       </div>
 
       {/* Input Area */}

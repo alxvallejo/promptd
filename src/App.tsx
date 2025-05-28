@@ -7,6 +7,7 @@ import { ChatInterface } from './components/ChatInterface'
 import { Picks } from './components/Picks'
 import { AppearanceSettings } from './components/AppearanceSettings'
 import { supabase } from './lib/supabase'
+import { setupPicksTable, PICKS_TABLE_SQL } from './lib/setupDatabase'
 
 interface Folder {
   id: string
@@ -55,19 +56,40 @@ const AppContent: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true)
   const [showAppearance, setShowAppearance] = useState(false)
   const [showPicks, setShowPicks] = useState(false)
+  const [dbError, setDbError] = useState<string | null>(null)
 
   useEffect(() => {
     if (user) {
-      loadData()
+      initializeApp()
     } else {
       setIsLoading(false)
     }
   }, [user])
 
-  const loadData = async () => {
+  const initializeApp = async () => {
     try {
       setIsLoading(true)
+      setDbError(null)
       
+      // First, try to setup the picks table
+      try {
+        await setupPicksTable()
+      } catch (error) {
+        console.warn('Could not auto-create picks table:', error)
+        setDbError('Database setup needed. Please run the SQL schema in your Supabase dashboard.')
+      }
+      
+      await loadData()
+    } catch (error) {
+      console.error('Error initializing app:', error)
+      setDbError('Failed to load application data. Please check your database connection.')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const loadData = async () => {
+    try {
       // Load folders
       const { data: foldersData, error: foldersError } = await supabase
         .from('folders')
@@ -110,32 +132,38 @@ const AppContent: React.FC = () => {
         setPrompts(formattedPrompts)
       }
 
-      // Load picks
-      const { data: picksData, error: picksError } = await supabase
-        .from('picks')
-        .select('*')
-        .eq('user_id', user?.id)
-        .order('created_at', { ascending: false })
+      // Load picks (only if table exists)
+      try {
+        const { data: picksData, error: picksError } = await supabase
+          .from('picks')
+          .select('*')
+          .eq('user_id', user?.id)
+          .order('created_at', { ascending: false })
 
-      if (picksError) {
-        console.error('Error loading picks:', picksError)
-      } else {
-        const formattedPicks = picksData?.map(pick => ({
-          id: pick.id,
-          category: pick.category,
-          content: pick.content,
-          linkPreviews: pick.link_previews || [],
-          weekOf: pick.week_of,
-          userId: pick.user_id,
-          createdAt: new Date(pick.created_at),
-          updatedAt: new Date(pick.updated_at),
-        })) || []
-        setPicks(formattedPicks)
+        if (picksError) {
+          if (picksError.message.includes('relation "public.picks" does not exist')) {
+            console.log('Picks table does not exist yet')
+          } else {
+            console.error('Error loading picks:', picksError)
+          }
+        } else {
+          const formattedPicks = picksData?.map(pick => ({
+            id: pick.id,
+            category: pick.category,
+            content: pick.content,
+            linkPreviews: pick.link_previews || [],
+            weekOf: pick.week_of,
+            userId: pick.user_id,
+            createdAt: new Date(pick.created_at),
+            updatedAt: new Date(pick.updated_at),
+          })) || []
+          setPicks(formattedPicks)
+        }
+      } catch (error) {
+        console.log('Picks table not available:', error)
       }
     } catch (error) {
       console.error('Error loading data:', error)
-    } finally {
-      setIsLoading(false)
     }
   }
 
@@ -254,7 +282,10 @@ const AppContent: React.FC = () => {
 
       if (error) {
         console.error('Error saving pick:', error)
-        return
+        if (error.message.includes('relation "public.picks" does not exist')) {
+          setDbError('Picks table does not exist. Please run the SQL schema in your Supabase dashboard.')
+        }
+        throw error
       }
 
       const newPick: Pick = {
@@ -269,8 +300,10 @@ const AppContent: React.FC = () => {
       }
 
       setPicks(prev => [newPick, ...prev])
+      console.log('Pick saved successfully:', newPick)
     } catch (error) {
       console.error('Error saving pick:', error)
+      throw error
     }
   }
 
@@ -359,6 +392,46 @@ const AppContent: React.FC = () => {
 
   if (!user) {
     return <Auth />
+  }
+
+  // Show database error if there's an issue
+  if (dbError && showPicks) {
+    return (
+      <div className="flex h-screen bg-gray-50 dark:bg-slate-50">
+        <Sidebar
+          folders={folders}
+          activeFolder={activeFolder}
+          onFolderSelect={handleFolderSelect}
+          onNewFolder={handleNewFolder}
+          onNewPrompt={handleNewPrompt}
+          showAppearance={showAppearance}
+          onToggleAppearance={handleToggleAppearance}
+          showPicks={showPicks}
+          onTogglePicks={handleTogglePicks}
+        />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center max-w-2xl p-8">
+            <h2 className="text-2xl font-bold mb-4" style={{ color: 'var(--color-text)' }}>
+              Database Setup Required
+            </h2>
+            <p className="mb-6" style={{ color: 'var(--color-text-secondary)' }}>
+              The Picks feature requires a database table that doesn't exist yet. Please run the following SQL in your Supabase dashboard:
+            </p>
+            <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg text-left overflow-x-auto">
+              <pre className="text-sm" style={{ color: 'var(--color-text)' }}>
+                {PICKS_TABLE_SQL}
+              </pre>
+            </div>
+            <button
+              onClick={() => setDbError(null)}
+              className="mt-4 btn-primary"
+            >
+              Try Again
+            </button>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   const renderMainContent = () => {
