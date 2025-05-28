@@ -1,0 +1,51 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-gray-50 text-slate-800 font-inter;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    margin: 0;
+    min-height: 100vh;
+  }
+  
+  .dark body {
+    @apply bg-slate-900 text-slate-200;
+  }
+}
+
+@layer components {
+  .chat-bubble-user {
+    @apply bg-indigo-100 border border-indigo-200 text-slate-800 rounded-2xl px-4 py-3 max-w-[80%] ml-auto;
+  }
+  
+  .dark .chat-bubble-user {
+    @apply bg-indigo-900/30 border-indigo-700/50 text-slate-200;
+  }
+  
+  .chat-bubble-assistant {
+    @apply bg-gray-100 border border-gray-200 text-slate-700 rounded-2xl px-4 py-3 max-w-[80%] mr-auto;
+  }
+  
+  .dark .chat-bubble-assistant {
+    @apply bg-slate-800 border-slate-700 text-slate-300;
+  }
+  
+  .sidebar-item {
+    @apply flex items-center gap-3 px-4 py-3 rounded-lg text-slate-600 hover:bg-gray-100 hover:text-slate-800 transition-all duration-200 cursor-pointer;
+  }
+  
+  .dark .sidebar-item {
+    @apply text-slate-400 hover:bg-slate-800 hover:text-slate-200;
+  }
+  
+  .sidebar-item.active {
+    @apply bg-indigo-100 text-indigo-700 border border-indigo-200;
+  }
+  
+  .dark .sidebar-item.active {
+    @apply bg-indigo-900/30 text-indigo-300 border-indigo-700/50;
+  }
+}
