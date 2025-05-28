@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Plus, Folder, MessageSquare, Settings, Moon, Sun, User, LogOut, Palette } from 'lucide-react'
+import { Plus, Folder, MessageSquare, Settings, Moon, Sun, User, LogOut, Palette, Star } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { useTheme, type ColorScheme } from '../context/ThemeContext'
 
@@ -11,6 +11,8 @@ interface SidebarProps {
   onNewPrompt: () => void
   showAppearance: boolean
   onToggleAppearance: () => void
+  showPicks: boolean
+  onTogglePicks: () => void
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -21,6 +23,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onNewPrompt,
   showAppearance,
   onToggleAppearance,
+  showPicks,
+  onTogglePicks,
 }) => {
   const { signOut, user } = useAuth()
   const { isDark, toggleTheme, fontFamily, setFontFamily, colorScheme, setColorScheme } = useTheme()
@@ -74,6 +78,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </button>
       </div>
 
+      {/* Main Navigation */}
+      <div className="px-4 mb-4">
+        <div
+          className={`sidebar-item ${showPicks ? 'active' : ''}`}
+          onClick={onTogglePicks}
+        >
+          <Star size={18} />
+          Picks
+        </div>
+      </div>
+
       {/* Folders */}
       <div className="flex-1 px-4 overflow-y-auto">
         <div className="mb-4">
@@ -93,7 +108,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
           
           <div
-            className={`sidebar-item ${activeFolder === null ? 'active' : ''}`}
+            className={`sidebar-item ${activeFolder === null && !showPicks && !showAppearance ? 'active' : ''}`}
             onClick={() => onFolderSelect(null)}
           >
             <MessageSquare size={18} />

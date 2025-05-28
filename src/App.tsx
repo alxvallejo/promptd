@@ -4,6 +4,8 @@ import { ThemeProvider } from './context/ThemeContext'
 import { Auth } from './components/Auth'
 import { Sidebar } from './components/Sidebar'
 import { ChatInterface } from './components/ChatInterface'
+import { Picks } from './components/Picks'
+import { AppearanceSettings } from './components/AppearanceSettings'
 import { supabase } from './lib/supabase'
 
 interface Folder {
@@ -24,14 +26,35 @@ interface Prompt {
   updatedAt: Date
 }
 
+interface LinkPreview {
+  url: string
+  title?: string
+  description?: string
+  image?: string
+  loading: boolean
+}
+
+interface Pick {
+  id: string
+  category: string
+  content: string
+  linkPreviews: LinkPreview[]
+  weekOf: string
+  userId: string
+  createdAt: Date
+  updatedAt: Date
+}
+
 const AppContent: React.FC = () => {
   const { user, loading } = useAuth()
   const [folders, setFolders] = useState<Folder[]>([])
   const [prompts, setPrompts] = useState<Prompt[]>([])
+  const [picks, setPicks] = useState<Pick[]>([])
   const [activeFolder, setActiveFolder] = useState<string | null>(null)
   const [activePrompt, setActivePrompt] = useState<Prompt | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [showAppearance, setShowAppearance] = useState(false)
+  const [showPicks, setShowPicks] = useState(false)
 
   useEffect(() => {
     if (user) {
@@ -86,6 +109,29 @@ const AppContent: React.FC = () => {
         })) || []
         setPrompts(formattedPrompts)
       }
+
+      // Load picks
+      const { data: picksData, error: picksError } = await supabase
+        .from('picks')
+        .select('*')
+        .eq('user_id', user?.id)
+        .order('created_at', { ascending: false })
+
+      if (picksError) {
+        console.error('Error loading picks:', picksError)
+      } else {
+        const formattedPicks = picksData?.map(pick => ({
+          id: pick.id,
+          category: pick.category,
+          content: pick.content,
+          linkPreviews: pick.link_previews || [],
+          weekOf: pick.week_of,
+          userId: pick.user_id,
+          createdAt: new Date(pick.created_at),
+          updatedAt: new Date(pick.updated_at),
+        })) || []
+        setPicks(formattedPicks)
+      }
     } catch (error) {
       console.error('Error loading data:', error)
     } finally {
@@ -130,12 +176,24 @@ const AppContent: React.FC = () => {
     setActivePrompt(null)
     setActiveFolder(null)
     setShowAppearance(false)
+    setShowPicks(false)
   }
 
   const handleToggleAppearance = () => {
     setShowAppearance(!showAppearance)
+    setShowPicks(false)
     // Clear active prompt when showing appearance settings
     if (!showAppearance) {
+      setActivePrompt(null)
+      setActiveFolder(null)
+    }
+  }
+
+  const handleTogglePicks = () => {
+    setShowPicks(!showPicks)
+    setShowAppearance(false)
+    // Clear active prompt when showing picks
+    if (!showPicks) {
       setActivePrompt(null)
       setActiveFolder(null)
     }
@@ -175,6 +233,44 @@ const AppContent: React.FC = () => {
       setActivePrompt(newPrompt)
     } catch (error) {
       console.error('Error saving prompt:', error)
+    }
+  }
+
+  const handleSavePick = async (pickData: { category: string; content: string; linkPreviews: LinkPreview[]; weekOf: string }) => {
+    if (!user) return
+
+    try {
+      const { data, error } = await supabase
+        .from('picks')
+        .insert([{
+          category: pickData.category,
+          content: pickData.content,
+          link_previews: pickData.linkPreviews,
+          week_of: pickData.weekOf,
+          user_id: user.id,
+        }])
+        .select()
+        .single()
+
+      if (error) {
+        console.error('Error saving pick:', error)
+        return
+      }
+
+      const newPick: Pick = {
+        id: data.id,
+        category: data.category,
+        content: data.content,
+        linkPreviews: data.link_previews || [],
+        weekOf: data.week_of,
+        userId: data.user_id,
+        createdAt: new Date(data.created_at),
+        updatedAt: new Date(data.updated_at),
+      }
+
+      setPicks(prev => [newPick, ...prev])
+    } catch (error) {
+      console.error('Error saving pick:', error)
     }
   }
 
@@ -239,6 +335,7 @@ const AppContent: React.FC = () => {
   const handleFolderSelect = (folderId: string | null) => {
     setActiveFolder(folderId)
     setShowAppearance(false)
+    setShowPicks(false)
     
     // Find the first prompt in the selected folder
     const folderPrompts = prompts.filter(prompt => 
@@ -264,6 +361,26 @@ const AppContent: React.FC = () => {
     return <Auth />
   }
 
+  const renderMainContent = () => {
+    if (showAppearance) {
+      return <AppearanceSettings />
+    }
+    
+    if (showPicks) {
+      return <Picks onSavePick={handleSavePick} />
+    }
+    
+    return (
+      <ChatInterface
+        activePrompt={activePrompt}
+        onSavePrompt={handleSavePrompt}
+        onUpdatePrompt={handleUpdatePrompt}
+        onDeletePrompt={handleDeletePrompt}
+        showAppearance={showAppearance}
+      />
+    )
+  }
+
   return (
     <div className="flex h-screen bg-gray-50 dark:bg-slate-50">
       <Sidebar
@@ -274,14 +391,10 @@ const AppContent: React.FC = () => {
         onNewPrompt={handleNewPrompt}
         showAppearance={showAppearance}
         onToggleAppearance={handleToggleAppearance}
+        showPicks={showPicks}
+        onTogglePicks={handleTogglePicks}
       />
-      <ChatInterface
-        activePrompt={activePrompt}
-        onSavePrompt={handleSavePrompt}
-        onUpdatePrompt={handleUpdatePrompt}
-        onDeletePrompt={handleDeletePrompt}
-        showAppearance={showAppearance}
-      />
+      {renderMainContent()}
     </div>
   )
 }
