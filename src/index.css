@@ -4,48 +4,227 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    /* GitHub Light Theme */
+    --color-bg: #ffffff;
+    --color-bg-secondary: #f6f8fa;
+    --color-bg-tertiary: #f1f3f4;
+    --color-text: #24292f;
+    --color-text-secondary: #656d76;
+    --color-text-muted: #8b949e;
+    --color-border: #d0d7de;
+    --color-border-muted: #e1e4e8;
+    --color-accent: #0969da;
+    --color-accent-hover: #0860ca;
+    --color-accent-bg: #dbeafe;
+    --color-success: #1a7f37;
+    --color-warning: #d1242f;
+  }
+
+  .dark {
+    /* GitHub Dark Theme */
+    --color-bg: #0d1117;
+    --color-bg-secondary: #161b22;
+    --color-bg-tertiary: #21262d;
+    --color-text: #f0f6fc;
+    --color-text-secondary: #8b949e;
+    --color-text-muted: #6e7681;
+    --color-border: #30363d;
+    --color-border-muted: #21262d;
+    --color-accent: #2f81f7;
+    --color-accent-hover: #388bfd;
+    --color-accent-bg: #1f2937;
+    --color-success: #3fb950;
+    --color-warning: #f85149;
+  }
+
+  /* VS Code Theme */
+  .theme-vscode {
+    --color-bg: #ffffff;
+    --color-bg-secondary: #f3f3f3;
+    --color-bg-tertiary: #ebebeb;
+    --color-text: #333333;
+    --color-text-secondary: #616161;
+    --color-text-muted: #8e8e8e;
+    --color-border: #e5e5e5;
+    --color-border-muted: #f0f0f0;
+    --color-accent: #007acc;
+    --color-accent-hover: #005a9e;
+    --color-accent-bg: #e7f3ff;
+    --color-success: #28a745;
+    --color-warning: #dc3545;
+  }
+
+  .theme-vscode.dark {
+    --color-bg: #1e1e1e;
+    --color-bg-secondary: #252526;
+    --color-bg-tertiary: #2d2d30;
+    --color-text: #cccccc;
+    --color-text-secondary: #9d9d9d;
+    --color-text-muted: #6a6a6a;
+    --color-border: #3e3e42;
+    --color-border-muted: #2d2d30;
+    --color-accent: #0e639c;
+    --color-accent-hover: #1177bb;
+    --color-accent-bg: #094771;
+    --color-success: #89d185;
+    --color-warning: #f48771;
+  }
+
+  /* Minimal Theme */
+  .theme-minimal {
+    --color-bg: #fefefe;
+    --color-bg-secondary: #f8f9fa;
+    --color-bg-tertiary: #f1f3f4;
+    --color-text: #1a1a1a;
+    --color-text-secondary: #4a5568;
+    --color-text-muted: #718096;
+    --color-border: #e2e8f0;
+    --color-border-muted: #edf2f7;
+    --color-accent: #667eea;
+    --color-accent-hover: #5a67d8;
+    --color-accent-bg: #eef2ff;
+    --color-success: #48bb78;
+    --color-warning: #ed8936;
+  }
+
+  .theme-minimal.dark {
+    --color-bg: #0f0f0f;
+    --color-bg-secondary: #1a1a1a;
+    --color-bg-tertiary: #262626;
+    --color-text: #f7fafc;
+    --color-text-secondary: #a0aec0;
+    --color-text-muted: #718096;
+    --color-border: #2d3748;
+    --color-border-muted: #1a202c;
+    --color-accent: #7c3aed;
+    --color-accent-hover: #8b5cf6;
+    --color-accent-bg: #2d1b69;
+    --color-success: #68d391;
+    --color-warning: #f6ad55;
+  }
+
   body {
-    @apply bg-gray-50 text-slate-800 font-inter;
+    background-color: var(--color-bg);
+    color: var(--color-text);
     transition: background-color 0.3s ease, color 0.3s ease;
     margin: 0;
     min-height: 100vh;
-  }
-  
-  .dark body {
-    @apply bg-slate-900 text-slate-200;
   }
 }
 
 @layer components {
   .chat-bubble-user {
-    @apply bg-indigo-100 border border-indigo-200 text-slate-800 rounded-2xl px-4 py-3 max-w-[80%] ml-auto;
-  }
-  
-  .dark .chat-bubble-user {
-    @apply bg-indigo-900/30 border-indigo-700/50 text-slate-200;
+    background-color: var(--color-accent-bg);
+    border: 1px solid var(--color-accent);
+    color: var(--color-text);
+    @apply rounded-2xl px-4 py-3 max-w-[80%] ml-auto;
   }
   
   .chat-bubble-assistant {
-    @apply bg-gray-100 border border-gray-200 text-slate-700 rounded-2xl px-4 py-3 max-w-[80%] mr-auto;
-  }
-  
-  .dark .chat-bubble-assistant {
-    @apply bg-slate-800 border-slate-700 text-slate-300;
+    background-color: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-secondary);
+    @apply rounded-2xl px-4 py-3 max-w-[80%] mr-auto;
   }
   
   .sidebar-item {
-    @apply flex items-center gap-3 px-4 py-3 rounded-lg text-slate-600 hover:bg-gray-100 hover:text-slate-800 transition-all duration-200 cursor-pointer;
+    @apply flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 cursor-pointer;
+    color: var(--color-text-secondary);
   }
-  
-  .dark .sidebar-item {
-    @apply text-slate-400 hover:bg-slate-800 hover:text-slate-200;
+
+  .sidebar-item:hover {
+    background-color: var(--color-bg-tertiary);
+    color: var(--color-text);
   }
   
   .sidebar-item.active {
-    @apply bg-indigo-100 text-indigo-700 border border-indigo-200;
+    background-color: var(--color-accent-bg);
+    color: var(--color-accent);
+    border: 1px solid var(--color-accent);
   }
-  
-  .dark .sidebar-item.active {
-    @apply bg-indigo-900/30 text-indigo-300 border-indigo-700/50;
+
+  .btn-primary {
+    background-color: var(--color-accent);
+    color: white;
+    border: 1px solid var(--color-accent);
+    @apply px-4 py-2 rounded-lg font-medium transition-all duration-200;
+  }
+
+  .btn-primary:hover {
+    background-color: var(--color-accent-hover);
+    border-color: var(--color-accent-hover);
+  }
+
+  .btn-secondary {
+    background-color: var(--color-bg-secondary);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+    @apply px-4 py-2 rounded-lg font-medium transition-all duration-200;
+  }
+
+  .btn-secondary:hover {
+    background-color: var(--color-bg-tertiary);
+    border-color: var(--color-border);
+  }
+
+  .input-field {
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+    @apply px-3 py-2 rounded-lg focus:outline-none focus:ring-2 transition-all duration-200;
+    --tw-ring-color: var(--color-accent);
+  }
+
+  .card {
+    background-color: var(--color-bg);
+    border: 1px solid var(--color-border);
+    @apply rounded-lg shadow-sm;
+  }
+
+  .divider {
+    border-color: var(--color-border);
+  }
+
+  /* Large prompt input styling */
+  .prompt-input {
+    background-color: transparent;
+    color: var(--color-text);
+    caret-color: var(--color-accent);
+    border: none;
+    outline: none;
+    resize: none;
+    font-size: 1.25rem;
+    line-height: 1.6;
+    font-weight: 400;
+    transition: all 0.2s ease;
+  }
+
+  .prompt-input::placeholder {
+    color: var(--color-text-muted);
+    opacity: 0.7;
+  }
+
+  .prompt-input:focus::placeholder {
+    opacity: 0.5;
+  }
+
+  /* Blinking cursor animation */
+  @keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+  }
+
+  .prompt-input:focus {
+    animation: none; /* Remove any default animations */
+  }
+
+  /* Custom cursor for empty input */
+  .prompt-input:focus:placeholder-shown::after {
+    content: '_';
+    color: var(--color-accent);
+    animation: blink 1s infinite;
+    position: absolute;
+    margin-left: 2px;
   }
 }

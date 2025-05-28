@@ -1,10 +1,14 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
 
+export type ColorScheme = 'github' | 'vscode' | 'minimal'
+
 interface ThemeContextType {
   isDark: boolean
   toggleTheme: () => void
   fontFamily: string
   setFontFamily: (font: string) => void
+  colorScheme: ColorScheme
+  setColorScheme: (scheme: ColorScheme) => void
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
@@ -31,6 +35,11 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     return localStorage.getItem('fontFamily') || 'font-inter'
   })
 
+  const [colorScheme, setColorScheme] = useState<ColorScheme>(() => {
+    const saved = localStorage.getItem('colorScheme') as ColorScheme
+    return saved || 'github'
+  })
+
   useEffect(() => {
     const root = window.document.documentElement
     if (isDark) {
@@ -50,6 +59,15 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     localStorage.setItem('fontFamily', fontFamily)
   }, [fontFamily])
 
+  useEffect(() => {
+    // Remove all color scheme classes
+    const root = window.document.documentElement
+    root.classList.remove('theme-github', 'theme-vscode', 'theme-minimal')
+    // Add the selected color scheme class
+    root.classList.add(`theme-${colorScheme}`)
+    localStorage.setItem('colorScheme', colorScheme)
+  }, [colorScheme])
+
   const toggleTheme = () => {
     setIsDark(!isDark)
   }
@@ -59,6 +77,8 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     toggleTheme,
     fontFamily,
     setFontFamily,
+    colorScheme,
+    setColorScheme,
   }
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>

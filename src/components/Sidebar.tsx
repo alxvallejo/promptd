@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
-import { Plus, Folder, MessageSquare, Settings, Moon, Sun, User, LogOut } from 'lucide-react'
+import { Plus, Folder, MessageSquare, Settings, Moon, Sun, User, LogOut, Palette } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
-import { useTheme } from '../context/ThemeContext'
+import { useTheme, type ColorScheme } from '../context/ThemeContext'
 
 interface SidebarProps {
   folders: Array<{ id: string; name: string }>
@@ -9,6 +9,8 @@ interface SidebarProps {
   onFolderSelect: (folderId: string | null) => void
   onNewFolder: () => void
   onNewPrompt: () => void
+  showAppearance: boolean
+  onToggleAppearance: () => void
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -17,10 +19,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onFolderSelect,
   onNewFolder,
   onNewPrompt,
+  showAppearance,
+  onToggleAppearance,
 }) => {
   const { signOut, user } = useAuth()
-  const { isDark, toggleTheme, fontFamily, setFontFamily } = useTheme()
-  const [showSettings, setShowSettings] = useState(false)
+  const { isDark, toggleTheme, fontFamily, setFontFamily, colorScheme, setColorScheme } = useTheme()
 
   const fontOptions = [
     { value: 'font-inter', label: 'Inter' },
@@ -29,11 +32,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { value: 'font-dm-sans', label: 'DM Sans' },
   ]
 
+  const colorSchemeOptions: Array<{ value: ColorScheme; label: string; description: string }> = [
+    { value: 'github', label: 'GitHub', description: 'Clean and professional' },
+    { value: 'vscode', label: 'VS Code', description: 'Developer-friendly' },
+    { value: 'minimal', label: 'Minimal', description: 'Simple and elegant' },
+  ]
+
   return (
-    <div className="w-64 h-screen bg-white dark:bg-slate-100 border-r border-gray-200 dark:border-slate-200 flex flex-col">
+    <div className="w-64 h-screen flex flex-col" style={{ 
+      backgroundColor: 'var(--color-bg-secondary)', 
+      borderRight: '1px solid var(--color-border)' 
+    }}>
       {/* Header */}
-      <div className="p-4 border-b border-gray-200 dark:border-slate-200">
-        <h1 className="text-xl font-semibold text-slate-800 dark:text-slate-200">
+      <div className="p-4" style={{ borderBottom: '1px solid var(--color-border)' }}>
+        <h1 className="text-xl font-semibold" style={{ color: 'var(--color-text)' }}>
           Prompt.d
         </h1>
       </div>
@@ -42,7 +54,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
       <div className="p-4">
         <button
           onClick={onNewPrompt}
-          className="w-full flex items-center gap-3 px-4 py-3 bg-indigo-100 dark:bg-indigo-100 text-indigo-700 dark:text-indigo-700 rounded-lg border border-indigo-200 dark:border-indigo-200 hover:bg-indigo-200 dark:hover:bg-indigo-200 transition-all duration-200"
+          className="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200"
+          style={{
+            backgroundColor: 'var(--color-accent-bg)',
+            color: 'var(--color-accent)',
+            border: '1px solid var(--color-accent)'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = 'var(--color-accent)'
+            e.currentTarget.style.color = 'white'
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'var(--color-accent-bg)'
+            e.currentTarget.style.color = 'var(--color-accent)'
+          }}
         >
           <Plus size={18} />
           New Prompt
@@ -53,12 +78,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
       <div className="flex-1 px-4 overflow-y-auto">
         <div className="mb-4">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-slate-500 dark:text-slate-400">
+            <span className="text-sm font-medium" style={{ color: 'var(--color-text-muted)' }}>
               Folders
             </span>
             <button
               onClick={onNewFolder}
-              className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+              className="transition-colors"
+              style={{ color: 'var(--color-text-muted)' }}
+              onMouseEnter={(e) => e.currentTarget.style.color = 'var(--color-text)'}
+              onMouseLeave={(e) => e.currentTarget.style.color = 'var(--color-text-muted)'}
             >
               <Plus size={16} />
             </button>
@@ -85,32 +113,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
       </div>
 
-      {/* Settings Panel */}
-      {showSettings && (
-        <div className="p-4 border-t border-gray-200 dark:border-slate-200 bg-gray-50 dark:bg-slate-50">
-          <div className="space-y-4">
-            <div>
-              <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2 block">
-                Font Family
-              </label>
-              <select
-                value={fontFamily}
-                onChange={(e) => setFontFamily(e.target.value)}
-                className="w-full px-3 py-2 bg-white dark:bg-slate-100 border border-gray-200 dark:border-slate-200 rounded-lg text-sm text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-500"
-              >
-                {fontOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Bottom Actions */}
-      <div className="p-4 border-t border-gray-200 dark:border-slate-200">
+      <div style={{ 
+        borderTop: '1px solid var(--color-border)',
+        height: '20vh',
+        padding: '24px',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'flex-start'
+      }}>
         <div className="space-y-2">
           <button
             onClick={toggleTheme}
@@ -121,11 +132,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </button>
           
           <button
-            onClick={() => setShowSettings(!showSettings)}
-            className="sidebar-item w-full"
+            onClick={onToggleAppearance}
+            className={`sidebar-item w-full ${showAppearance ? 'active' : ''}`}
           >
-            <Settings size={18} />
-            Settings
+            <Palette size={18} />
+            Appearance
           </button>
           
           <div className="sidebar-item">
@@ -135,7 +146,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
           
           <button
             onClick={signOut}
-            className="sidebar-item w-full text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950"
+            className="sidebar-item w-full transition-colors"
+            style={{ color: 'var(--color-warning)' }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = 'var(--color-warning)'
+              e.currentTarget.style.color = 'white'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent'
+              e.currentTarget.style.color = 'var(--color-warning)'
+            }}
           >
             <LogOut size={18} />
             Sign Out

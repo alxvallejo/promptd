@@ -31,6 +31,7 @@ const AppContent: React.FC = () => {
   const [activeFolder, setActiveFolder] = useState<string | null>(null)
   const [activePrompt, setActivePrompt] = useState<Prompt | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [showAppearance, setShowAppearance] = useState(false)
 
   useEffect(() => {
     if (user) {
@@ -128,6 +129,16 @@ const AppContent: React.FC = () => {
   const handleNewPrompt = () => {
     setActivePrompt(null)
     setActiveFolder(null)
+    setShowAppearance(false)
+  }
+
+  const handleToggleAppearance = () => {
+    setShowAppearance(!showAppearance)
+    // Clear active prompt when showing appearance settings
+    if (!showAppearance) {
+      setActivePrompt(null)
+      setActiveFolder(null)
+    }
   }
 
   const handleSavePrompt = async (promptData: { title: string; content: string; folderId: string | null }) => {
@@ -227,6 +238,7 @@ const AppContent: React.FC = () => {
 
   const handleFolderSelect = (folderId: string | null) => {
     setActiveFolder(folderId)
+    setShowAppearance(false)
     
     // Find the first prompt in the selected folder
     const folderPrompts = prompts.filter(prompt => 
@@ -260,12 +272,15 @@ const AppContent: React.FC = () => {
         onFolderSelect={handleFolderSelect}
         onNewFolder={handleNewFolder}
         onNewPrompt={handleNewPrompt}
+        showAppearance={showAppearance}
+        onToggleAppearance={handleToggleAppearance}
       />
       <ChatInterface
         activePrompt={activePrompt}
         onSavePrompt={handleSavePrompt}
         onUpdatePrompt={handleUpdatePrompt}
         onDeletePrompt={handleDeletePrompt}
+        showAppearance={showAppearance}
       />
     </div>
   )
@@ -273,11 +288,11 @@ const AppContent: React.FC = () => {
 
 const App: React.FC = () => {
   return (
-    <ThemeProvider>
-      <AuthProvider>
+    <AuthProvider>
+      <ThemeProvider>
         <AppContent />
-      </AuthProvider>
-    </ThemeProvider>
+      </ThemeProvider>
+    </AuthProvider>
   )
 }
 
