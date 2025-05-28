@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&family=DM+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600;700&family=Fira+Code:wght@300;400;500;600;700&family=Source+Serif+Pro:wght@300;400;500;600;700&family=Playfair+Display:wght@300;400;500;600;700&family=Merriweather:wght@300;400;500;600;700&family=Lato:wght@300;400;500;600;700&family=Montserrat:wght@300;400;500;600;700&family=Roboto+Slab:wght@300;400;500;600;700&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -44,8 +44,8 @@
     --color-bg-secondary: #f3f3f3;
     --color-bg-tertiary: #ebebeb;
     --color-text: #333333;
-    --color-text-secondary: #616161;
-    --color-text-muted: #8e8e8e;
+    --color-text-secondary: #757575;
+    --color-text-muted: #999999;
     --color-border: #e5e5e5;
     --color-border-muted: #f0f0f0;
     --color-accent: #007acc;
@@ -60,8 +60,8 @@
     --color-bg-secondary: #252526;
     --color-bg-tertiary: #2d2d30;
     --color-text: #cccccc;
-    --color-text-secondary: #9d9d9d;
-    --color-text-muted: #6a6a6a;
+    --color-text-secondary: #b3b3b3;
+    --color-text-muted: #808080;
     --color-border: #3e3e42;
     --color-border-muted: #2d2d30;
     --color-accent: #0e639c;
@@ -77,8 +77,8 @@
     --color-bg-secondary: #f8f9fa;
     --color-bg-tertiary: #f1f3f4;
     --color-text: #1a1a1a;
-    --color-text-secondary: #4a5568;
-    --color-text-muted: #718096;
+    --color-text-secondary: #666666;
+    --color-text-muted: #999999;
     --color-border: #e2e8f0;
     --color-border-muted: #edf2f7;
     --color-accent: #667eea;
@@ -93,8 +93,8 @@
     --color-bg-secondary: #1a1a1a;
     --color-bg-tertiary: #262626;
     --color-text: #f7fafc;
-    --color-text-secondary: #a0aec0;
-    --color-text-muted: #718096;
+    --color-text-secondary: #b3b3b3;
+    --color-text-muted: #808080;
     --color-border: #2d3748;
     --color-border-muted: #1a202c;
     --color-accent: #7c3aed;
@@ -267,4 +267,12 @@
   .font-poppins { font-family: 'Poppins', sans-serif; }
   .font-space-grotesk { font-family: 'Space Grotesk', sans-serif; }
   .font-dm-sans { font-family: 'DM Sans', sans-serif; }
+  .font-jetbrains-mono { font-family: 'JetBrains Mono', monospace; }
+  .font-fira-code { font-family: 'Fira Code', monospace; }
+  .font-source-serif { font-family: 'Source Serif Pro', serif; }
+  .font-playfair { font-family: 'Playfair Display', serif; }
+  .font-merriweather { font-family: 'Merriweather', serif; }
+  .font-lato { font-family: 'Lato', sans-serif; }
+  .font-montserrat { font-family: 'Montserrat', sans-serif; }
+  .font-roboto-slab { font-family: 'Roboto Slab', serif; }
 }

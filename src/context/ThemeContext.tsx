@@ -25,6 +25,21 @@ interface ThemeProviderProps {
   children: React.ReactNode
 }
 
+const fontClasses = [
+  'font-inter',
+  'font-poppins', 
+  'font-space-grotesk',
+  'font-dm-sans',
+  'font-jetbrains-mono',
+  'font-fira-code',
+  'font-source-serif',
+  'font-playfair',
+  'font-merriweather',
+  'font-lato',
+  'font-montserrat',
+  'font-roboto-slab'
+]
+
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   const [isDark, setIsDark] = useState(() => {
     const saved = localStorage.getItem('theme')
@@ -53,7 +68,9 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   useEffect(() => {
     const root = window.document.documentElement
     // Remove all font classes
-    root.classList.remove('font-inter', 'font-poppins', 'font-space-grotesk', 'font-dm-sans')
+    fontClasses.forEach(fontClass => {
+      root.classList.remove(fontClass)
+    })
     // Add the selected font class
     root.classList.add(fontFamily)
     localStorage.setItem('fontFamily', fontFamily)
