@@ -9,6 +9,9 @@ A beautiful prompt journal application with ChatGPT-like interface, built with R
 - 🔐 **Google Authentication** - Secure login via Google OAuth
 - 👤 **User Profiles** - Automatic profile creation with first names from Google OAuth
 - 🌟 **Weekly Picks** - Share and discover community recommendations
+- 🗑️ **Pick Management** - Edit and delete your own picks
+- 🎬 **IMDB Integration** - Automatic movie/TV show lookup when typing titles in quotes
+- 🔗 **Link Previews** - Rich previews when pasting URLs (IMDB, YouTube, etc.)
 - 🌙 **Dark Mode** - Beautiful dark/light theme toggle
 - 🎨 **Modern Fonts** - Choose from 4 professional font families
 - 📁 **Folder Organization** - Create folders to organize your prompts
@@ -69,6 +72,13 @@ npm install
    VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
    ```
 
+3. **Optional**: Add your OMDB API key for IMDB integration in `.env`:
+   ```env
+   VITE_OMDB_API_KEY=your_omdb_api_key_here
+   ```
+   
+   Get a free API key at [http://www.omdbapi.com/apikey.aspx](http://www.omdbapi.com/apikey.aspx). If not provided, the app will use a default key with limited usage.
+
 ### 6. Run the development server
 
 ```bash
@@ -104,19 +114,88 @@ src/
 │   └── ThemeContext.tsx  # Dark mode & fonts
 ├── lib/
 │   ├── supabase.ts       # Database client
-│   └── setupDatabase.ts  # Database setup utilities
+│   ├── setupDatabase.ts  # Database setup utilities
+│   ├── imdbSearch.ts     # IMDB/OMDB API integration
+│   └── linkPreview.ts    # General URL link preview functionality
 └── index.css             # Custom styles
 ```
 
 ## 🔒 Security
 
 - Row Level Security (RLS) enabled on all tables
-- Users can only access their own data (except picks which are public)
+- Users can only access their own data (except picks which are public for viewing)
+- Users can only delete their own picks (enforced at database level)
 - Google OAuth for secure authentication
 - Environment variables for sensitive data
 - Automatic user profile creation with data extraction from OAuth metadata
 
+## 🎬 IMDB Integration
+
+The app includes automatic IMDB lookup for movies and TV shows:
+
+- When adding a **Movie** or **TV** pick, put the title in quotes: `"The Matrix"`
+- The app will automatically search IMDB and display:
+  - Movie poster or TV show image
+  - Plot summary and genre information
+  - IMDB rating and year
+  - Direct link to the IMDB page
+- Works with various quote types: `"title"`, `'title'`, `"title"`, `'title'`
+- Uses the [OMDB API](http://www.omdbapi.com/) with a built-in API key
+
+### Example Usage
+```
+I'm watching "Breaking Bad" this week - such an incredible series!
+```
+This will automatically fetch the Breaking Bad IMDB information and display it as a rich preview.
+
+## 🔗 Link Previews
+
+The app automatically generates rich previews when you paste URLs:
+
+### IMDB Links
+- Paste any IMDB movie or TV show URL: `https://www.imdb.com/title/tt3896198/`
+- Automatically fetches movie details using OMDB API
+- Shows movie poster, ratings, plot, and year
+- Works with any IMDB URL format
+
+### YouTube Videos
+- Paste YouTube video URLs: `https://www.youtube.com/watch?v=dQw4w9WgXcQ`
+- Shows video title, channel name, and thumbnail
+- Works with youtu.be short links and embed URLs
+
+### Other URLs
+- Generates basic previews for any website
+- Shows domain name and creates placeholder imagery
+- Supports Netflix, Steam, and other popular platforms
+
+### Example Usage
+```
+Check out this amazing movie: https://www.imdb.com/title/tt0111161/
+Great tutorial: https://www.youtube.com/watch?v=abc123
+```
+
+The app will automatically detect these URLs and show rich previews with images, titles, and descriptions.
+
 ## 🆕 Recent Updates
+
+### Link Preview Functionality
+- Added real link preview generation when pasting URLs
+- Special IMDB URL handling with rich movie/TV data via OMDB API
+- YouTube video preview with title, channel, and thumbnail
+- General URL preview support for any website
+- Automatic URL detection and preview generation
+
+### Pick Management
+- Added delete functionality for picks - users can now delete their own picks
+- Delete buttons appear only for picks belonging to the current user
+- Confirmation dialog prevents accidental deletions
+- Immediate UI updates for better user experience
+
+### IMDB Integration
+- Added automatic IMDB lookup for movies and TV shows when titles are in quotes
+- Rich previews with posters, ratings, and plot summaries
+- Direct links to IMDB pages
+- Built-in OMDB API key for immediate functionality
 
 ### User Profiles & First Names
 - Added automatic user profile creation when users sign up with Google OAuth

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
-import { Film, Tv, Gamepad2, Calendar, MoreHorizontal, ExternalLink, User } from 'lucide-react'
+import { Film, Tv, Gamepad2, Calendar, MoreHorizontal, ExternalLink, User, Trash2 } from 'lucide-react'
 import { supabase } from '../lib/supabase'
+import type { User as SupabaseUser } from '@supabase/supabase-js'
 
 interface LinkPreview {
   url: string
@@ -22,6 +23,8 @@ interface Pick {
 
 interface WeeklyPicksProps {
   currentWeek: string
+  currentUser?: SupabaseUser | null
+  onDeletePick?: (pickId: string) => void
 }
 
 const categories = [
@@ -32,7 +35,7 @@ const categories = [
   { id: 'other', label: 'Other', icon: MoreHorizontal },
 ]
 
-export const WeeklyPicks: React.FC<WeeklyPicksProps> = ({ currentWeek }) => {
+export const WeeklyPicks: React.FC<WeeklyPicksProps> = ({ currentWeek, currentUser, onDeletePick }) => {
   const [picks, setPicks] = useState<Pick[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
@@ -45,19 +48,44 @@ export const WeeklyPicks: React.FC<WeeklyPicksProps> = ({ currentWeek }) => {
     try {
       setLoading(true)
       
-      // Load picks for the current week from all users with user profile information
-      const { data: picksData, error } = await supabase
+      // Load picks for the current week
+      const { data: picksData, error: picksError } = await supabase
         .from('picks')
-        .select(`
-          *,
-          profiles!inner(first_name)
-        `)
+        .select('*')
         .eq('week_of', currentWeek)
         .order('created_at', { ascending: false })
 
-      if (error) {
-        console.error('Error loading weekly picks:', error)
+      if (picksError) {
+        console.error('Error loading weekly picks:', picksError)
         return
+      }
+
+      console.log(`Loaded ${picksData?.length || 0} picks for week: ${currentWeek}`)
+
+      // Load user profiles to get first names
+      let profilesMap = new Map()
+      
+      if (picksData && picksData.length > 0) {
+        const userIds = [...new Set(picksData.map(pick => pick.user_id))]
+        console.log(`Loading profiles for ${userIds.length} users`)
+        
+        try {
+          const { data: profilesData, error: profilesError } = await supabase
+            .from('profiles')
+            .select('id, first_name')
+            .in('id', userIds)
+
+          if (!profilesError && profilesData) {
+            profilesData.forEach(profile => {
+              profilesMap.set(profile.id, profile.first_name)
+            })
+            console.log(`Loaded ${profilesData.length} user profiles`)
+          } else if (profilesError) {
+            console.log('Profiles table not available:', profilesError.message)
+          }
+        } catch (profilesError) {
+          console.log('Could not load profiles:', profilesError)
+        }
       }
 
       const formattedPicks = picksData?.map(pick => ({
@@ -67,11 +95,12 @@ export const WeeklyPicks: React.FC<WeeklyPicksProps> = ({ currentWeek }) => {
         linkPreviews: pick.link_previews || [],
         weekOf: pick.week_of,
         userId: pick.user_id,
-        userFirstName: pick.profiles?.first_name || 'Anonymous User',
+        userFirstName: profilesMap.get(pick.user_id) || 'Anonymous User',
         createdAt: new Date(pick.created_at),
       })) || []
 
       setPicks(formattedPicks)
+      console.log(`Formatted ${formattedPicks.length} picks for display`)
     } catch (error) {
       console.error('Error loading weekly picks:', error)
     } finally {
@@ -89,6 +118,20 @@ export const WeeklyPicks: React.FC<WeeklyPicksProps> = ({ currentWeek }) => {
 
   const getPicksCount = (categoryId: string) => {
     return getPicksByCategory(categoryId).length
+  }
+
+  const handleDeletePick = async (pickId: string) => {
+    if (onDeletePick) {
+      try {
+        await onDeletePick(pickId)
+        // Remove the pick from local state immediately for better UX
+        setPicks(prev => prev.filter(pick => pick.id !== pickId))
+      } catch (error) {
+        console.error('Error deleting pick:', error)
+        // Optionally reload picks if delete failed
+        loadWeeklyPicks()
+      }
+    }
   }
 
   if (loading) {
@@ -199,6 +242,32 @@ export const WeeklyPicks: React.FC<WeeklyPicksProps> = ({ currentWeek }) => {
                       {pick.createdAt.toLocaleDateString()} at {pick.createdAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </div>
                   </div>
+                  {/* Delete button - only show for current user's picks */}
+                  {currentUser && pick.userId === currentUser.id && onDeletePick && (
+                    <button
+                      onClick={() => {
+                        if (confirm('Are you sure you want to delete this pick?')) {
+                          handleDeletePick(pick.id)
+                        }
+                      }}
+                      className="p-2 rounded-lg transition-colors"
+                      style={{ 
+                        color: 'var(--color-text-muted)',
+                        backgroundColor: 'transparent'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.color = 'var(--color-warning)'
+                        e.currentTarget.style.backgroundColor = 'var(--color-bg-tertiary)'
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.color = 'var(--color-text-muted)'
+                        e.currentTarget.style.backgroundColor = 'transparent'
+                      }}
+                      title="Delete this pick"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  )}
                 </div>
 
                 {/* Pick Content */}

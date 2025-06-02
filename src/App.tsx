@@ -307,6 +307,28 @@ const AppContent: React.FC = () => {
     }
   }
 
+  const handleDeletePick = async (pickId: string) => {
+    if (!user) return
+
+    try {
+      const { error } = await supabase
+        .from('picks')
+        .delete()
+        .eq('id', pickId)
+        .eq('user_id', user.id)
+
+      if (error) {
+        console.error('Error deleting pick:', error)
+        return
+      }
+
+      setPicks(prev => prev.filter(pick => pick.id !== pickId))
+      console.log('Pick deleted successfully:', pickId)
+    } catch (error) {
+      console.error('Error deleting pick:', error)
+    }
+  }
+
   const handleUpdatePrompt = async (id: string, updates: Partial<Prompt>) => {
     if (!user) return
 
@@ -440,7 +462,7 @@ const AppContent: React.FC = () => {
     }
     
     if (showPicks) {
-      return <Picks onSavePick={handleSavePick} />
+      return <Picks onSavePick={handleSavePick} onDeletePick={handleDeletePick} currentUser={user} />
     }
     
     return (
