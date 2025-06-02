@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Film, Tv, Gamepad2, Calendar, MoreHorizontal, ExternalLink, User, Trash2 } from 'lucide-react'
+import { Film, Tv, Gamepad2, Calendar, MoreHorizontal, ExternalLink, User, Trash2, Presentation, X, ChevronLeft, ChevronRight } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import type { User as SupabaseUser } from '@supabase/supabase-js'
 
@@ -41,10 +41,53 @@ export const WeeklyPicks: React.FC<WeeklyPicksProps> = ({ currentWeek, currentUs
   const [loading, setLoading] = useState(true)
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const [selectedPerson, setSelectedPerson] = useState<string | null>(null)
+  const [presentationMode, setPresentationMode] = useState<{ isOpen: boolean; userGroup: any; currentSlide: number } | null>(null)
 
   useEffect(() => {
     loadWeeklyPicks()
   }, [currentWeek])
+
+  // Keyboard navigation for presentation mode
+  useEffect(() => {
+    if (!presentationMode?.isOpen) return
+
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setPresentationMode(null)
+      } else if (e.key === 'ArrowRight' || e.key === ' ') {
+        e.preventDefault()
+        nextSlide()
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault()
+        previousSlide()
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyPress)
+    return () => window.removeEventListener('keydown', handleKeyPress)
+  }, [presentationMode])
+
+  // Presentation navigation functions
+  const nextSlide = () => {
+    if (!presentationMode) return
+    const totalSlides = presentationMode.userGroup.picks.length
+    const nextIndex = (presentationMode.currentSlide + 1) % totalSlides
+    setPresentationMode({ ...presentationMode, currentSlide: nextIndex })
+  }
+
+  const previousSlide = () => {
+    if (!presentationMode) return
+    const totalSlides = presentationMode.userGroup.picks.length
+    const prevIndex = presentationMode.currentSlide === 0 
+      ? totalSlides - 1 
+      : presentationMode.currentSlide - 1
+    setPresentationMode({ ...presentationMode, currentSlide: prevIndex })
+  }
+
+  const goToSlide = (index: number) => {
+    if (!presentationMode) return
+    setPresentationMode({ ...presentationMode, currentSlide: index })
+  }
 
   const loadWeeklyPicks = async () => {
     try {
@@ -133,10 +176,6 @@ export const WeeklyPicks: React.FC<WeeklyPicksProps> = ({ currentWeek, currentUs
 
   const getPicksByCategory = (categoryId: string) => {
     return picks.filter(pick => pick.category === categoryId)
-  }
-
-  const getPicksByPerson = (userId: string) => {
-    return picks.filter(pick => pick.userId === userId)
   }
 
   const getUniquePeople = () => {
@@ -342,7 +381,7 @@ export const WeeklyPicks: React.FC<WeeklyPicksProps> = ({ currentWeek, currentUs
                 >
                   <User size={20} />
                 </div>
-                <div>
+                <div className="flex-1">
                   <h4 className="text-lg font-semibold" style={{ color: 'var(--color-text)' }}>
                     {userGroup.userFirstName}
                   </h4>
@@ -350,6 +389,30 @@ export const WeeklyPicks: React.FC<WeeklyPicksProps> = ({ currentWeek, currentUs
                     {userGroup.picks.length} pick{userGroup.picks.length !== 1 ? 's' : ''} this week
                   </p>
                 </div>
+                {/* Presentation Mode Button */}
+                <button
+                  onClick={() => setPresentationMode({ isOpen: true, userGroup, currentSlide: 0 })}
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200"
+                  style={{
+                    backgroundColor: 'var(--color-bg)',
+                    color: 'var(--color-text-secondary)',
+                    border: '1px solid var(--color-border)',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = 'var(--color-accent)'
+                    e.currentTarget.style.color = 'white'
+                    e.currentTarget.style.borderColor = 'var(--color-accent)'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'var(--color-bg)'
+                    e.currentTarget.style.color = 'var(--color-text-secondary)'
+                    e.currentTarget.style.borderColor = 'var(--color-border)'
+                  }}
+                  title={`Present ${userGroup.userFirstName}'s picks`}
+                >
+                  <Presentation size={16} />
+                  <span className="text-sm font-medium">Present</span>
+                </button>
               </div>
 
               {/* User's Picks */}
@@ -469,6 +532,225 @@ export const WeeklyPicks: React.FC<WeeklyPicksProps> = ({ currentWeek, currentUs
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Presentation Mode Lightbox */}
+      {presentationMode?.isOpen && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center"
+          style={{ backgroundColor: 'rgba(0, 0, 0, 0.95)' }}
+          onClick={() => setPresentationMode(null)}
+        >
+          <div 
+            className="w-full h-full flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Presentation Header */}
+            <div className="flex items-center justify-between p-6" style={{ backgroundColor: 'var(--color-bg)' }}>
+              <div className="flex items-center gap-4">
+                <h2 className="text-2xl font-bold" style={{ color: 'var(--color-text)' }}>
+                  {presentationMode.userGroup.userFirstName}'s Picks
+                </h2>
+                <span className="text-lg" style={{ color: 'var(--color-text-secondary)' }}>
+                  Week of {currentWeek}
+                </span>
+              </div>
+              
+              {/* Slide Counter */}
+              <div className="flex items-center gap-4">
+                <span className="text-lg font-medium" style={{ color: 'var(--color-text-secondary)' }}>
+                  {presentationMode.currentSlide + 1} / {presentationMode.userGroup.picks.length}
+                </span>
+                <button
+                  onClick={() => setPresentationMode(null)}
+                  className="p-2 rounded-full transition-colors"
+                  style={{
+                    backgroundColor: 'var(--color-bg-tertiary)',
+                    color: 'var(--color-text-muted)'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = 'var(--color-warning)'
+                    e.currentTarget.style.color = 'white'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'var(--color-bg-tertiary)'
+                    e.currentTarget.style.color = 'var(--color-text-muted)'
+                  }}
+                >
+                  <X size={20} />
+                </button>
+              </div>
+            </div>
+
+            {/* Current Slide Content */}
+            <div className="flex-1 flex items-center justify-center p-8" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
+              {(() => {
+                const currentPick = presentationMode.userGroup.picks[presentationMode.currentSlide]
+                const categoryData = categories.find(c => c.id === currentPick.category)
+                const Icon = categoryData?.icon || MoreHorizontal
+
+                return (
+                  <div 
+                    className="w-full max-w-4xl p-8 rounded-3xl"
+                    style={{ 
+                      backgroundColor: 'var(--color-bg)',
+                      border: '3px solid var(--color-border)',
+                      minHeight: '60vh'
+                    }}
+                  >
+                    {/* Slide Header */}
+                    <div className="flex items-center gap-6 mb-8">
+                      <div 
+                        className="p-4 rounded-2xl"
+                        style={{ 
+                          backgroundColor: 'var(--color-accent)',
+                          color: 'white'
+                        }}
+                      >
+                        <Icon size={32} />
+                      </div>
+                      <div>
+                        <h3 className="text-4xl font-bold mb-2" style={{ color: 'var(--color-text)' }}>
+                          {categoryData?.label}
+                        </h3>
+                        <p className="text-lg" style={{ color: 'var(--color-text-muted)' }}>
+                          {currentPick.createdAt.toLocaleDateString()} at {currentPick.createdAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Slide Content */}
+                    {currentPick.content && (
+                      <div className="mb-8">
+                        <p className="text-2xl leading-relaxed whitespace-pre-wrap" style={{ color: 'var(--color-text)' }}>
+                          {currentPick.content}
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Link Previews - Full Slide Format */}
+                    {currentPick.linkPreviews.length > 0 && (
+                      <div className="space-y-6">
+                        {currentPick.linkPreviews.map((preview: LinkPreview, previewIndex: number) => (
+                          <div
+                            key={previewIndex}
+                            className="flex gap-8 p-6 rounded-2xl"
+                            style={{ 
+                              backgroundColor: 'var(--color-bg-secondary)',
+                              border: '2px solid var(--color-border)'
+                            }}
+                          >
+                            {preview.image && (
+                              <img
+                                src={preview.image}
+                                alt={preview.title}
+                                className={`object-cover rounded-xl ${preview.isImage ? 'w-48 h-48' : 'w-32 h-32'}`}
+                              />
+                            )}
+                            <div className="flex-1 min-w-0 flex flex-col justify-center">
+                              <h4 className="text-3xl font-bold mb-4" style={{ color: 'var(--color-text)' }}>
+                                {preview.title || 'Link Preview'}
+                              </h4>
+                              {preview.description && (
+                                <p className="text-xl mb-6 leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
+                                  {preview.description}
+                                </p>
+                              )}
+                              {!preview.isImage && (
+                                <a
+                                  href={preview.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-3 px-6 py-3 rounded-xl font-semibold text-lg transition-colors self-start"
+                                  style={{ 
+                                    backgroundColor: 'var(--color-accent)',
+                                    color: 'white'
+                                  }}
+                                  onMouseEnter={(e) => e.currentTarget.style.opacity = '0.9'}
+                                  onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+                                >
+                                  <ExternalLink size={20} />
+                                  Visit Link
+                                </a>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )
+              })()}
+            </div>
+
+            {/* Navigation Controls */}
+            <div className="flex items-center justify-between p-6" style={{ backgroundColor: 'var(--color-bg)' }}>
+              {/* Previous Button */}
+              <button
+                onClick={previousSlide}
+                className="flex items-center gap-3 px-6 py-3 rounded-xl font-medium transition-all duration-200"
+                style={{
+                  backgroundColor: 'var(--color-bg-tertiary)',
+                  color: 'var(--color-text)',
+                  border: '2px solid var(--color-border)'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = 'var(--color-accent)'
+                  e.currentTarget.style.color = 'white'
+                  e.currentTarget.style.borderColor = 'var(--color-accent)'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'var(--color-bg-tertiary)'
+                  e.currentTarget.style.color = 'var(--color-text)'
+                  e.currentTarget.style.borderColor = 'var(--color-border)'
+                }}
+              >
+                <ChevronLeft size={20} />
+                Previous
+              </button>
+
+              {/* Slide Dots */}
+              <div className="flex items-center gap-2">
+                {presentationMode.userGroup.picks.map((_: any, index: number) => (
+                  <button
+                    key={index}
+                    onClick={() => goToSlide(index)}
+                    className="w-3 h-3 rounded-full transition-all duration-200"
+                    style={{
+                      backgroundColor: index === presentationMode.currentSlide 
+                        ? 'var(--color-accent)' 
+                        : 'var(--color-border)',
+                      transform: index === presentationMode.currentSlide ? 'scale(1.2)' : 'scale(1)'
+                    }}
+                  />
+                ))}
+              </div>
+
+              {/* Next Button */}
+              <button
+                onClick={nextSlide}
+                className="flex items-center gap-3 px-6 py-3 rounded-xl font-medium transition-all duration-200"
+                style={{
+                  backgroundColor: 'var(--color-accent)',
+                  color: 'white',
+                  border: '2px solid var(--color-accent)'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.opacity = '0.9'}
+                onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+              >
+                Next
+                <ChevronRight size={20} />
+              </button>
+            </div>
+
+            {/* Keyboard Shortcuts Hint */}
+            <div className="text-center pb-4">
+              <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>
+                Use ← → arrow keys or spacebar to navigate • ESC to close
+              </p>
+            </div>
+          </div>
         </div>
       )}
     </div>

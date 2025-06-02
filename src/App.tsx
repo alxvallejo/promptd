@@ -35,22 +35,10 @@ interface LinkPreview {
   loading: boolean
 }
 
-interface Pick {
-  id: string
-  category: string
-  content: string
-  linkPreviews: LinkPreview[]
-  weekOf: string
-  userId: string
-  createdAt: Date
-  updatedAt: Date
-}
-
 const AppContent: React.FC = () => {
   const { user, loading } = useAuth()
   const [folders, setFolders] = useState<Folder[]>([])
   const [prompts, setPrompts] = useState<Prompt[]>([])
-  const [picks, setPicks] = useState<Pick[]>([])
   const [activeFolder, setActiveFolder] = useState<string | null>(null)
   const [activePrompt, setActivePrompt] = useState<Prompt | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -147,17 +135,7 @@ const AppContent: React.FC = () => {
             console.error('Error loading picks:', picksError)
           }
         } else {
-          const formattedPicks = picksData?.map(pick => ({
-            id: pick.id,
-            category: pick.category,
-            content: pick.content,
-            linkPreviews: pick.link_previews || [],
-            weekOf: pick.week_of,
-            userId: pick.user_id,
-            createdAt: new Date(pick.created_at),
-            updatedAt: new Date(pick.updated_at),
-          })) || []
-          setPicks(formattedPicks)
+          console.log('Picks loaded successfully:', picksData?.length || 0)
         }
       } catch (error) {
         console.log('Picks table not available:', error)
@@ -288,19 +266,7 @@ const AppContent: React.FC = () => {
         throw error
       }
 
-      const newPick: Pick = {
-        id: data.id,
-        category: data.category,
-        content: data.content,
-        linkPreviews: data.link_previews || [],
-        weekOf: data.week_of,
-        userId: data.user_id,
-        createdAt: new Date(data.created_at),
-        updatedAt: new Date(data.updated_at),
-      }
-
-      setPicks(prev => [newPick, ...prev])
-      console.log('Pick saved successfully:', newPick)
+      console.log('Pick saved successfully:', data)
     } catch (error) {
       console.error('Error saving pick:', error)
       throw error
@@ -322,7 +288,6 @@ const AppContent: React.FC = () => {
         return
       }
 
-      setPicks(prev => prev.filter(pick => pick.id !== pickId))
       console.log('Pick deleted successfully:', pickId)
     } catch (error) {
       console.error('Error deleting pick:', error)

@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react'
-import { Plus, Folder, MessageSquare, Settings, Moon, Sun, User, LogOut, Palette, Star } from 'lucide-react'
+import React, { useEffect, useState } from 'react'
+import { Plus, Folder, MessageSquare, Moon, Sun, User, LogOut, Palette, Star } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
-import { useTheme, type ColorScheme } from '../context/ThemeContext'
+import { useTheme } from '../context/ThemeContext'
 import { supabase } from '../lib/supabase'
 
 interface SidebarProps {
@@ -28,21 +28,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onTogglePicks,
 }) => {
   const { signOut, user } = useAuth()
-  const { isDark, toggleTheme, fontFamily, setFontFamily, colorScheme, setColorScheme } = useTheme()
+  const { isDark, toggleTheme } = useTheme()
   const [userFirstName, setUserFirstName] = useState<string | null>(null)
-
-  const fontOptions = [
-    { value: 'font-inter', label: 'Inter' },
-    { value: 'font-poppins', label: 'Poppins' },
-    { value: 'font-space-grotesk', label: 'Space Grotesk' },
-    { value: 'font-dm-sans', label: 'DM Sans' },
-  ]
-
-  const colorSchemeOptions: Array<{ value: ColorScheme; label: string; description: string }> = [
-    { value: 'github', label: 'GitHub', description: 'Clean and professional' },
-    { value: 'vscode', label: 'VS Code', description: 'Developer-friendly' },
-    { value: 'minimal', label: 'Minimal', description: 'Simple and elegant' },
-  ]
 
   useEffect(() => {
     const fetchUserProfile = async () => {

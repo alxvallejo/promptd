@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { Send, Film, Tv, Gamepad2, Calendar, MoreHorizontal, X, ExternalLink, Upload, Image as ImageIcon } from 'lucide-react'
+import { Send, Film, Tv, Gamepad2, Calendar, MoreHorizontal, X, ExternalLink } from 'lucide-react'
 import { WeeklyPicks } from './WeeklyPicks'
 import { extractIMDBId, searchIMDBById, createIMDBLinkPreview } from '../lib/imdbSearch'
 import { fetchGeneralLinkPreview } from '../lib/linkPreview'
-import { uploadImage, createImagePreview, validateDroppedFiles, type ImagePreview } from '../lib/imageUpload'
+import { uploadImage, createImagePreview, validateDroppedFiles } from '../lib/imageUpload'
 import type { User } from '@supabase/supabase-js'
 
 interface LinkPreview {
@@ -15,15 +15,6 @@ interface LinkPreview {
   imdbData?: any
   isImage?: boolean
   originalFile?: File
-}
-
-interface Pick {
-  id: string
-  category: string
-  content: string
-  linkPreviews: LinkPreview[]
-  weekOf: string
-  createdAt: Date
 }
 
 interface PicksProps {
@@ -395,7 +386,7 @@ export const Picks: React.FC<PicksProps> = ({ onSavePick, onDeletePick, currentU
                 />
                 <div className="flex flex-col items-center gap-2">
                   <div className="p-3 rounded-full" style={{ backgroundColor: 'var(--color-bg)' }}>
-                    <ImageIcon size={24} style={{ color: 'var(--color-accent)' }} />
+                    {selectedCategoryData && <selectedCategoryData.icon size={24} style={{ color: 'var(--color-accent)' }} />}
                   </div>
                   <div>
                     <p className="font-medium" style={{ color: 'var(--color-text)' }}>
@@ -572,7 +563,7 @@ export const Picks: React.FC<PicksProps> = ({ onSavePick, onDeletePick, currentU
                 onKeyDown={handleKeyPress}
                 placeholder={selectedCategoryData?.placeholder}
                 className="prompt-input flex-1"
-                rows={3}
+                rows={5}
               />
               <button
                 onClick={handleSubmit}
