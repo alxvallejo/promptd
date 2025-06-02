@@ -10,7 +10,6 @@ A beautiful prompt journal application with ChatGPT-like interface, built with R
 - 👤 **User Profiles** - Automatic profile creation with first names from Google OAuth
 - 🌟 **Weekly Picks** - Share and discover community recommendations
 - 🗑️ **Pick Management** - Edit and delete your own picks
-- 🎬 **IMDB Integration** - Automatic movie/TV show lookup when typing titles in quotes
 - 🔗 **Link Previews** - Rich previews when pasting URLs (IMDB, YouTube, etc.)
 - 🌙 **Dark Mode** - Beautiful dark/light theme toggle
 - 🎨 **Modern Fonts** - Choose from 4 professional font families
@@ -129,25 +128,6 @@ src/
 - Environment variables for sensitive data
 - Automatic user profile creation with data extraction from OAuth metadata
 
-## 🎬 IMDB Integration
-
-The app includes automatic IMDB lookup for movies and TV shows:
-
-- When adding a **Movie** or **TV** pick, put the title in quotes: `"The Matrix"`
-- The app will automatically search IMDB and display:
-  - Movie poster or TV show image
-  - Plot summary and genre information
-  - IMDB rating and year
-  - Direct link to the IMDB page
-- Works with various quote types: `"title"`, `'title'`, `"title"`, `'title'`
-- Uses the [OMDB API](http://www.omdbapi.com/) with a built-in API key
-
-### Example Usage
-```
-I'm watching "Breaking Bad" this week - such an incredible series!
-```
-This will automatically fetch the Breaking Bad IMDB information and display it as a rich preview.
-
 ## 🔗 Link Previews
 
 The app automatically generates rich previews when you paste URLs:
@@ -157,6 +137,7 @@ The app automatically generates rich previews when you paste URLs:
 - Automatically fetches movie details using OMDB API
 - Shows movie poster, ratings, plot, and year
 - Works with any IMDB URL format
+- URL is automatically replaced with the movie/TV show title for cleaner text
 
 ### YouTube Videos
 - Paste YouTube video URLs: `https://www.youtube.com/watch?v=dQw4w9WgXcQ`
@@ -174,7 +155,7 @@ Check out this amazing movie: https://www.imdb.com/title/tt0111161/
 Great tutorial: https://www.youtube.com/watch?v=abc123
 ```
 
-The app will automatically detect these URLs and show rich previews with images, titles, and descriptions.
+The app will automatically detect these URLs, show rich previews with images, titles, and descriptions, and replace IMDB URLs with clean movie titles.
 
 ## 🆕 Recent Updates
 
@@ -184,18 +165,13 @@ The app will automatically detect these URLs and show rich previews with images,
 - YouTube video preview with title, channel, and thumbnail
 - General URL preview support for any website
 - Automatic URL detection and preview generation
+- IMDB URLs are automatically replaced with movie titles for cleaner text
 
 ### Pick Management
 - Added delete functionality for picks - users can now delete their own picks
 - Delete buttons appear only for picks belonging to the current user
 - Confirmation dialog prevents accidental deletions
 - Immediate UI updates for better user experience
-
-### IMDB Integration
-- Added automatic IMDB lookup for movies and TV shows when titles are in quotes
-- Rich previews with posters, ratings, and plot summaries
-- Direct links to IMDB pages
-- Built-in OMDB API key for immediate functionality
 
 ### User Profiles & First Names
 - Added automatic user profile creation when users sign up with Google OAuth

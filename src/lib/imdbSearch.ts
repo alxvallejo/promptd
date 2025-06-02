@@ -23,41 +23,6 @@ interface IMDBLinkPreview {
 // OMDB API key - read from environment variables
 const OMDB_API_KEY = import.meta.env.VITE_OMDB_API_KEY
 
-export const searchIMDB = async (title: string, type?: 'movie' | 'series'): Promise<IMDBSearchResult | null> => {
-  try {
-    // Clean the title - remove quotes and extra spaces
-    const cleanTitle = title.replace(/["""'']/g, '').trim()
-    
-    const params = new URLSearchParams({
-      apikey: OMDB_API_KEY,
-      t: cleanTitle,
-      plot: 'short'
-    })
-    
-    if (type) {
-      params.append('type', type)
-    }
-    
-    const response = await fetch(`http://www.omdbapi.com/?${params}`)
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
-    }
-    
-    const data = await response.json()
-    
-    if (data.Response === 'True') {
-      return data as IMDBSearchResult
-    } else {
-      console.log('IMDB search failed:', data.Error)
-      return null
-    }
-  } catch (error) {
-    console.error('Error searching IMDB:', error)
-    return null
-  }
-}
-
 export const createIMDBLinkPreview = (imdbData: IMDBSearchResult): IMDBLinkPreview => {
   const imdbUrl = `https://www.imdb.com/title/${imdbData.imdbID}/`
   
@@ -80,33 +45,6 @@ export const createIMDBLinkPreview = (imdbData: IMDBSearchResult): IMDBLinkPrevi
     loading: false,
     imdbData
   }
-}
-
-export const detectQuotedTitles = (text: string): string[] => {
-  // Match text in various quote types: "title", 'title', "title", 'title'
-  const quoteRegex = /["""''](.*?)["""'']/g
-  const matches = []
-  let match
-  
-  while ((match = quoteRegex.exec(text)) !== null) {
-    const title = match[1].trim()
-    if (title.length > 0) {
-      matches.push(title)
-    }
-  }
-  
-  return matches
-}
-
-export const shouldSearchIMDB = (category: string, title: string): boolean => {
-  // Only search for movies and TV shows
-  if (!['movies', 'tv'].includes(category)) {
-    return false
-  }
-  
-  // Only search if title is reasonable length (not too short or too long)
-  const cleanTitle = title.replace(/["""'']/g, '').trim()
-  return cleanTitle.length >= 2 && cleanTitle.length <= 100
 }
 
 export const extractIMDBId = (url: string): string | null => {

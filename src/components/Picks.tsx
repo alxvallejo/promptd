@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { Send, Film, Tv, Gamepad2, Calendar, MoreHorizontal, X, ExternalLink } from 'lucide-react'
 import { WeeklyPicks } from './WeeklyPicks'
-import { searchIMDB, createIMDBLinkPreview, detectQuotedTitles, shouldSearchIMDB, extractIMDBId, searchIMDBById } from '../lib/imdbSearch'
+import { extractIMDBId, searchIMDBById, createIMDBLinkPreview } from '../lib/imdbSearch'
 import { fetchGeneralLinkPreview } from '../lib/linkPreview'
 import type { User } from '@supabase/supabase-js'
 
@@ -30,8 +30,8 @@ interface PicksProps {
 }
 
 const categories = [
-  { id: 'movies', label: 'Movies', icon: Film, placeholder: 'What movie are you picking this week? Put the title in "quotes" for automatic IMDb lookup, or paste a link...' },
-  { id: 'tv', label: 'TV', icon: Tv, placeholder: 'What TV show are you watching this week? Put the title in "quotes" for automatic IMDb lookup, or share a link...' },
+  { id: 'movies', label: 'Movies', icon: Film, placeholder: 'What movie are you picking this week? Share a link or describe your choice...' },
+  { id: 'tv', label: 'TV', icon: Tv, placeholder: 'What TV show are you watching this week? Share a link or tell us about it...' },
   { id: 'games', label: 'Video Games', icon: Gamepad2, placeholder: 'What game are you playing this week? Drop a link or describe your gaming pick...' },
   { id: 'activities', label: 'Activities', icon: Calendar, placeholder: 'What activity or experience are you picking this week? Share details or a link...' },
   { id: 'other', label: 'Other', icon: MoreHorizontal, placeholder: 'What else are you picking this week? Share your choice...' },
@@ -115,7 +115,7 @@ export const Picks: React.FC<PicksProps> = ({ onSavePick, onDeletePick, currentU
     }
   }
 
-  // Handle input change and detect URLs and quoted titles
+  // Handle input change and detect URLs
   const handleInputChange = async (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newValue = e.target.value
     setInputValue(newValue)
@@ -123,13 +123,6 @@ export const Picks: React.FC<PicksProps> = ({ onSavePick, onDeletePick, currentU
     // Extract URLs from text
     const urls = extractUrls(newValue)
     const newUrls = urls.filter(url => !linkPreviews.some(preview => preview.url === url))
-
-    // Extract quoted titles for IMDB search
-    const quotedTitles = detectQuotedTitles(newValue)
-    const newTitles = quotedTitles.filter(title => 
-      shouldSearchIMDB(selectedCategory, title) && 
-      !linkPreviews.some(preview => preview.url.includes('imdb.com') && preview.title?.includes(title.replace(/["""'']/g, '')))
-    )
 
     // Handle URL previews
     if (newUrls.length > 0) {
@@ -164,47 +157,8 @@ export const Picks: React.FC<PicksProps> = ({ onSavePick, onDeletePick, currentU
       }
     }
 
-    // Handle IMDB searches for quoted titles
-    if (newTitles.length > 0) {
-      // Add loading previews for IMDB searches
-      const loadingIMDBPreviews = newTitles.map(title => ({
-        url: `imdb-search-${title}`, // Temporary URL for tracking
-        title: `Searching "${title}"...`,
-        description: 'Looking up movie/TV show information...',
-        image: 'https://via.placeholder.com/300x400/f5c518/000000?text=IMDb+Search',
-        loading: true
-      }))
-      setLinkPreviews(prev => [...prev, ...loadingIMDBPreviews])
-
-      // Search IMDB for each quoted title
-      for (const title of newTitles) {
-        try {
-          const searchType = selectedCategory === 'movies' ? 'movie' : selectedCategory === 'tv' ? 'series' : undefined
-          const imdbData = await searchIMDB(title, searchType)
-          
-          if (imdbData) {
-            const imdbPreview = createIMDBLinkPreview(imdbData)
-            setLinkPreviews(prev => 
-              prev.map(p => p.url === `imdb-search-${title}` ? imdbPreview : p)
-            )
-          } else {
-            // Remove loading preview if no results found
-            setLinkPreviews(prev => 
-              prev.filter(p => p.url !== `imdb-search-${title}`)
-            )
-          }
-        } catch (error) {
-          console.error('Error searching IMDB for', title, error)
-          setLinkPreviews(prev => 
-            prev.filter(p => p.url !== `imdb-search-${title}`)
-          )
-        }
-      }
-    }
-
     // Remove previews for URLs that are no longer in the text
     const currentUrls = urls
-    const currentTitles = quotedTitles
     
     setLinkPreviews(prev => prev.filter(preview => {
       // Keep URL previews that are still in the text (or their replaced titles for IMDB)
@@ -215,18 +169,6 @@ export const Picks: React.FC<PicksProps> = ({ onSavePick, onDeletePick, currentU
           return currentUrls.includes(preview.url) || currentText.includes(preview.imdbData.Title)
         }
         return currentUrls.includes(preview.url)
-      }
-      // Keep IMDB previews for titles that are still quoted in the text
-      if (preview.url.includes('imdb.com') && preview.imdbData) {
-        return currentTitles.some(title => 
-          preview.title?.includes(title.replace(/["""'']/g, '')) ||
-          preview.imdbData.Title?.toLowerCase().includes(title.replace(/["""'']/g, '').toLowerCase())
-        )
-      }
-      // Keep loading IMDB searches
-      if (preview.url.startsWith('imdb-search-')) {
-        const searchTitle = preview.url.replace('imdb-search-', '')
-        return currentTitles.includes(searchTitle)
       }
       return false
     }))
@@ -316,19 +258,6 @@ export const Picks: React.FC<PicksProps> = ({ onSavePick, onDeletePick, currentU
               >
                 <Icon size={18} />
                 {category.label}
-                {(category.id === 'movies' || category.id === 'tv') && (
-                  <span 
-                    className="text-xs px-1.5 py-0.5 rounded-full font-medium"
-                    style={{
-                      backgroundColor: isSelected ? 'rgba(255,255,255,0.2)' : 'var(--color-accent)',
-                      color: isSelected ? 'white' : 'white',
-                      fontSize: '10px'
-                    }}
-                    title="Automatic IMDB lookup available - put titles in quotes"
-                  >
-                    IMDb
-                  </span>
-                )}
               </button>
             )
           })}
@@ -430,16 +359,14 @@ export const Picks: React.FC<PicksProps> = ({ onSavePick, onDeletePick, currentU
                   <p style={{ color: 'var(--color-text-secondary)' }}>
                     Share your weekly {selectedCategoryData?.label.toLowerCase()} pick below
                   </p>
-                  {(selectedCategory === 'movies' || selectedCategory === 'tv') && (
-                    <div className="mt-3 p-3 rounded-lg" style={{ backgroundColor: 'var(--color-bg-tertiary)' }}>
-                      <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-                        💡 <strong>Tip:</strong> Put titles in "quotes" for automatic IMDb lookup!
-                      </p>
-                      <p className="text-xs mt-1" style={{ color: 'var(--color-text-muted)' }}>
-                        Example: I just watched "The Matrix" - amazing film!
-                      </p>
-                    </div>
-                  )}
+                  <div className="mt-3 p-3 rounded-lg" style={{ backgroundColor: 'var(--color-bg-tertiary)' }}>
+                    <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+                      💡 <strong>Tip:</strong> Paste any URL for automatic link previews!
+                    </p>
+                    <p className="text-xs mt-1" style={{ color: 'var(--color-text-muted)' }}>
+                      IMDB, YouTube, and other links get rich previews automatically
+                    </p>
+                  </div>
                 </div>
               </div>
             )}
