@@ -330,78 +330,32 @@ export const Picks: React.FC<PicksProps> = ({ onSavePick, onDeletePick, currentU
         </h2>
       </div>
 
-      {/* Category Selection */}
-      <div className="px-6 py-4" style={{ 
-        borderBottom: '1px solid var(--color-border)', 
-        backgroundColor: 'var(--color-bg-secondary)' 
-      }}>
-        <div className="flex gap-2 flex-wrap">
-          {categories.map((category) => {
-            const Icon = category.icon
-            const isSelected = selectedCategory === category.id
-            
-            return (
-              <button
-                key={category.id}
-                onClick={() => setSelectedCategory(category.id)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 ${
-                  isSelected ? 'active' : ''
-                }`}
-                style={{
-                  backgroundColor: isSelected ? 'var(--color-accent)' : 'var(--color-bg)',
-                  color: isSelected ? 'white' : 'var(--color-text-secondary)',
-                  border: `1px solid ${isSelected ? 'var(--color-accent)' : 'var(--color-border)'}`,
-                }}
-                onMouseEnter={(e) => {
-                  if (!isSelected) {
-                    e.currentTarget.style.backgroundColor = 'var(--color-bg-tertiary)'
-                    e.currentTarget.style.color = 'var(--color-text)'
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!isSelected) {
-                    e.currentTarget.style.backgroundColor = 'var(--color-bg)'
-                    e.currentTarget.style.color = 'var(--color-text-secondary)'
-                  }
-                }}
-              >
-                <Icon size={18} />
-                {category.label}
-                {category.id === 'activities' && (
-                  <span 
-                    className="text-xs px-1.5 py-0.5 rounded-full font-medium"
-                    style={{
-                      backgroundColor: isSelected ? 'rgba(255,255,255,0.2)' : 'var(--color-accent)',
-                      color: isSelected ? 'white' : 'white',
-                      fontSize: '10px'
-                    }}
-                    title="Drag & drop images supported"
-                  >
-                    📷
-                  </span>
-                )}
-              </button>
-            )
-          })}
-        </div>
-      </div>
-
-      {/* Content Area - Split between input/previews and weekly picks */}
+      {/* Content Area - Input column left, Community Picks right */}
       <div 
-        className="flex-1 overflow-y-auto" 
+        className="flex-1 overflow-hidden grid grid-cols-2" 
         style={{ backgroundColor: 'var(--color-bg-secondary)' }}
-        onDragEnter={handleDragEnter}
-        onDragLeave={handleDragLeave}
-        onDragOver={handleDragOver}
-        onDrop={handleDrop}
       >
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6 h-full">
-          {/* Left Column - Input and Link Previews */}
-          <div className="space-y-4">
+        {/* Left Side - Input Column (50% width) */}
+        <div 
+          className="border-r flex flex-col"
+          style={{ 
+            borderColor: 'var(--color-border)',
+            backgroundColor: 'var(--color-bg)'
+          }}
+          onDragEnter={handleDragEnter}
+          onDragLeave={handleDragLeave}
+          onDragOver={handleDragOver}
+          onDrop={handleDrop}
+        >
+          {/* Input Column Header */}
+          <div className="p-4 border-b" style={{ borderColor: 'var(--color-border)' }}>
             <h3 className="text-lg font-semibold" style={{ color: 'var(--color-text)' }}>
               Share Your Pick
             </h3>
-            
+          </div>
+
+          {/* Input Column Content */}
+          <div className="flex-1 overflow-y-auto p-4 space-y-4">
             {/* Upload Errors */}
             {uploadErrors.length > 0 && (
               <div className="p-3 rounded-lg" style={{ backgroundColor: 'var(--color-error-bg)', borderLeft: '4px solid var(--color-error)' }}>
@@ -532,23 +486,20 @@ export const Picks: React.FC<PicksProps> = ({ onSavePick, onDeletePick, currentU
 
             {/* Welcome message when no content */}
             {linkPreviews.length === 0 && !inputValue && (
-              <div className="flex items-center justify-center h-48">
-                <div className="text-center max-w-md">
+              <div className="flex items-center justify-center py-12">
+                <div className="text-center max-w-sm">
                   <div className="mb-4">
                     {selectedCategoryData && <selectedCategoryData.icon size={48} style={{ color: 'var(--color-accent)', margin: '0 auto' }} />}
                   </div>
-                  <h4 className="text-xl font-bold mb-2" style={{ color: 'var(--color-text)' }}>
+                  <h4 className="text-lg font-bold mb-2" style={{ color: 'var(--color-text)' }}>
                     {selectedCategoryData?.label} Pick
                   </h4>
-                  <p style={{ color: 'var(--color-text-secondary)' }}>
+                  <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
                     Share your weekly {selectedCategoryData?.label.toLowerCase()} pick below
                   </p>
                   <div className="mt-3 p-3 rounded-lg" style={{ backgroundColor: 'var(--color-bg-tertiary)' }}>
-                    <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+                    <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
                       💡 <strong>Tip:</strong> {isActivitiesCategory ? 'Drag & drop images or paste URLs for previews!' : 'Paste any URL for automatic link previews!'}
-                    </p>
-                    <p className="text-xs mt-1" style={{ color: 'var(--color-text-muted)' }}>
-                      {isActivitiesCategory ? 'Perfect for sharing photos of your activities and experiences' : 'IMDB, YouTube, and other links get rich previews automatically'}
                     </p>
                   </div>
                 </div>
@@ -556,42 +507,93 @@ export const Picks: React.FC<PicksProps> = ({ onSavePick, onDeletePick, currentU
             )}
           </div>
 
-          {/* Right Column - Weekly Picks */}
-          <div>
-            <WeeklyPicks 
-              key={refreshKey} 
-              currentWeek={currentWeek} 
-              currentUser={currentUser}
-              onDeletePick={onDeletePick}
-            />
+          {/* Input Section at Bottom of Column */}
+          <div className="p-4 space-y-3 border-t" style={{ 
+            borderColor: 'var(--color-border)',
+            backgroundColor: 'var(--color-bg)'
+          }}>
+            {/* Category Selection */}
+            <div className="flex gap-2 flex-wrap">
+              {categories.map((category) => {
+                const Icon = category.icon
+                const isSelected = selectedCategory === category.id
+                
+                return (
+                  <button
+                    key={category.id}
+                    onClick={() => setSelectedCategory(category.id)}
+                    className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200 ${
+                      isSelected ? 'active' : ''
+                    }`}
+                    style={{
+                      backgroundColor: isSelected ? 'var(--color-accent)' : 'var(--color-bg)',
+                      color: isSelected ? 'white' : 'var(--color-text-secondary)',
+                      border: `1px solid ${isSelected ? 'var(--color-accent)' : 'var(--color-border)'}`,
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!isSelected) {
+                        e.currentTarget.style.backgroundColor = 'var(--color-bg-tertiary)'
+                        e.currentTarget.style.color = 'var(--color-text)'
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!isSelected) {
+                        e.currentTarget.style.backgroundColor = 'var(--color-bg)'
+                        e.currentTarget.style.color = 'var(--color-text-secondary)'
+                      }
+                    }}
+                  >
+                    <Icon size={16} />
+                    {category.label}
+                    {category.id === 'activities' && (
+                      <span 
+                        className="text-xs px-1.5 py-0.5 rounded-full font-medium"
+                        style={{
+                          backgroundColor: isSelected ? 'rgba(255,255,255,0.2)' : 'var(--color-accent)',
+                          color: isSelected ? 'white' : 'white',
+                          fontSize: '10px'
+                        }}
+                        title="Drag & drop images supported"
+                      >
+                        📷
+                      </span>
+                    )}
+                  </button>
+                )
+              })}
+            </div>
+
+            {/* Input and Send Button */}
+            <div className="flex gap-3">
+              <textarea
+                ref={inputRef}
+                value={inputValue}
+                onChange={handleInputChange}
+                onKeyDown={handleKeyPress}
+                placeholder={selectedCategoryData?.placeholder}
+                className="prompt-input flex-1"
+                rows={3}
+              />
+              <button
+                onClick={handleSubmit}
+                disabled={!inputValue.trim() && linkPreviews.length === 0}
+                className="btn-primary rounded-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center self-end"
+                style={{ minWidth: '48px', height: '48px' }}
+              >
+                <Send size={18} />
+              </button>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Input Area */}
-      <div className="p-6" style={{ 
-        backgroundColor: 'var(--color-bg)', 
-        borderTop: '1px solid var(--color-border)',
-        height: '20vh'
-      }}>
-        <div className="flex gap-4 h-full">
-          <textarea
-            ref={inputRef}
-            value={inputValue}
-            onChange={handleInputChange}
-            onKeyDown={handleKeyPress}
-            placeholder={selectedCategoryData?.placeholder}
-            className="prompt-input flex-1"
-            rows={1}
+        {/* Right Side - Community Picks Feed (50% width) */}
+        <div className="overflow-y-auto p-6">
+          <WeeklyPicks 
+            key={refreshKey} 
+            currentWeek={currentWeek} 
+            currentUser={currentUser}
+            onDeletePick={onDeletePick}
           />
-          <button
-            onClick={handleSubmit}
-            disabled={!inputValue.trim() && linkPreviews.length === 0}
-            className="btn-primary rounded-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center self-end"
-            style={{ minWidth: '56px', height: '56px' }}
-          >
-            <Send size={20} />
-          </button>
         </div>
       </div>
     </div>

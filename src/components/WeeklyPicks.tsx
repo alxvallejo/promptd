@@ -40,6 +40,7 @@ export const WeeklyPicks: React.FC<WeeklyPicksProps> = ({ currentWeek, currentUs
   const [picks, setPicks] = useState<Pick[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
+  const [selectedPerson, setSelectedPerson] = useState<string | null>(null)
 
   useEffect(() => {
     loadWeeklyPicks()
@@ -134,11 +135,38 @@ export const WeeklyPicks: React.FC<WeeklyPicksProps> = ({ currentWeek, currentUs
     return picks.filter(pick => pick.category === categoryId)
   }
 
-  const filteredPicks = selectedCategory 
-    ? getPicksByCategory(selectedCategory)
-    : picks
+  const getPicksByPerson = (userId: string) => {
+    return picks.filter(pick => pick.userId === userId)
+  }
+
+  const getUniquePeople = () => {
+    const peopleMap = new Map()
+    picks.forEach(pick => {
+      if (!peopleMap.has(pick.userId)) {
+        peopleMap.set(pick.userId, {
+          userId: pick.userId,
+          userFirstName: pick.userFirstName || 'Anonymous User',
+          pickCount: 0
+        })
+      }
+      peopleMap.get(pick.userId).pickCount++
+    })
+    return Array.from(peopleMap.values()).sort((a, b) => 
+      a.userFirstName.localeCompare(b.userFirstName)
+    )
+  }
+
+  // Apply both category and person filters
+  let filteredPicks = picks
+  if (selectedCategory) {
+    filteredPicks = filteredPicks.filter(pick => pick.category === selectedCategory)
+  }
+  if (selectedPerson) {
+    filteredPicks = filteredPicks.filter(pick => pick.userId === selectedPerson)
+  }
 
   const groupedPicks = groupPicksByUser(filteredPicks)
+  const uniquePeople = getUniquePeople()
 
   const getPicksCount = (categoryId: string) => {
     return getPicksByCategory(categoryId).length
@@ -171,13 +199,14 @@ export const WeeklyPicks: React.FC<WeeklyPicksProps> = ({ currentWeek, currentUs
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="text-center">
-        <h3 className="text-2xl font-bold mb-2" style={{ color: 'var(--color-text)' }}>
+      <div className="text-center mb-8">
+        <h3 className="text-3xl font-bold mb-3" style={{ color: 'var(--color-text)' }}>
           Community Picks
         </h3>
-        <p className="text-lg" style={{ color: 'var(--color-text-secondary)' }}>
+        <p className="text-xl" style={{ color: 'var(--color-text-secondary)' }}>
           Week of {currentWeek}
         </p>
+        <div className="mt-4 mx-auto w-24 h-1 rounded-full" style={{ backgroundColor: 'var(--color-accent)' }}></div>
       </div>
 
       {/* Category Filter */}
@@ -222,14 +251,80 @@ export const WeeklyPicks: React.FC<WeeklyPicksProps> = ({ currentWeek, currentUs
         })}
       </div>
 
+      {/* Person Filter */}
+      {uniquePeople.length > 1 && (
+        <div className="space-y-2">
+          <p className="text-center text-sm font-medium" style={{ color: 'var(--color-text-secondary)' }}>
+            Filter by Person
+          </p>
+          <div className="flex gap-2 flex-wrap justify-center">
+            <button
+              onClick={() => setSelectedPerson(null)}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 ${
+                selectedPerson === null ? 'active' : ''
+              }`}
+              style={{
+                backgroundColor: selectedPerson === null ? 'var(--color-accent)' : 'var(--color-bg)',
+                color: selectedPerson === null ? 'white' : 'var(--color-text-secondary)',
+                border: `1px solid ${selectedPerson === null ? 'var(--color-accent)' : 'var(--color-border)'}`,
+              }}
+            >
+              <User size={16} />
+              Everyone ({filteredPicks.length})
+            </button>
+            
+            {uniquePeople.map((person) => {
+              const isSelected = selectedPerson === person.userId
+              // Calculate how many picks this person has that match current category filter
+              let personPickCount = person.pickCount
+              if (selectedCategory) {
+                personPickCount = picks.filter(pick => 
+                  pick.userId === person.userId && pick.category === selectedCategory
+                ).length
+              }
+              
+              return (
+                <button
+                  key={person.userId}
+                  onClick={() => setSelectedPerson(person.userId)}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 ${
+                    isSelected ? 'active' : ''
+                  }`}
+                  style={{
+                    backgroundColor: isSelected ? 'var(--color-accent)' : 'var(--color-bg)',
+                    color: isSelected ? 'white' : 'var(--color-text-secondary)',
+                    border: `1px solid ${isSelected ? 'var(--color-accent)' : 'var(--color-border)'}`,
+                  }}
+                  disabled={personPickCount === 0}
+                >
+                  <User size={16} />
+                  {person.userFirstName} ({personPickCount})
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
       {/* Picks Display */}
       {filteredPicks.length === 0 ? (
         <div className="text-center py-12">
           <p className="text-lg" style={{ color: 'var(--color-text-muted)' }}>
-            {selectedCategory 
-              ? `No ${categories.find(c => c.id === selectedCategory)?.label.toLowerCase()} picks this week yet.`
-              : 'No picks shared this week yet. Be the first to share!'
-            }
+            {(() => {
+              if (selectedCategory && selectedPerson) {
+                const categoryLabel = categories.find(c => c.id === selectedCategory)?.label.toLowerCase()
+                const personName = uniquePeople.find(p => p.userId === selectedPerson)?.userFirstName
+                return `No ${categoryLabel} picks from ${personName} this week.`
+              } else if (selectedCategory) {
+                const categoryLabel = categories.find(c => c.id === selectedCategory)?.label.toLowerCase()
+                return `No ${categoryLabel} picks this week yet.`
+              } else if (selectedPerson) {
+                const personName = uniquePeople.find(p => p.userId === selectedPerson)?.userFirstName
+                return `No picks from ${personName} this week yet.`
+              } else {
+                return 'No picks shared this week yet. Be the first to share!'
+              }
+            })()}
           </p>
         </div>
       ) : (
