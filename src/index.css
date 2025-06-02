@@ -19,6 +19,8 @@
     --color-accent-bg: #dbeafe;
     --color-success: #1a7f37;
     --color-warning: #d1242f;
+    --color-error: #d1242f;
+    --color-error-bg: #fef2f2;
   }
 
   .dark {
@@ -36,6 +38,8 @@
     --color-accent-bg: #1f2937;
     --color-success: #3fb950;
     --color-warning: #f85149;
+    --color-error: #f85149;
+    --color-error-bg: #1f1315;
   }
 
   /* VS Code Theme */
@@ -53,6 +57,8 @@
     --color-accent-bg: #e7f3ff;
     --color-success: #28a745;
     --color-warning: #dc3545;
+    --color-error: #dc3545;
+    --color-error-bg: #f8d7da;
   }
 
   .theme-vscode.dark {
@@ -69,6 +75,8 @@
     --color-accent-bg: #094771;
     --color-success: #89d185;
     --color-warning: #f48771;
+    --color-error: #f48771;
+    --color-error-bg: #2d1b1d;
   }
 
   /* Minimal Theme */
@@ -86,6 +94,8 @@
     --color-accent-bg: #eef2ff;
     --color-success: #48bb78;
     --color-warning: #ed8936;
+    --color-error: #e53e3e;
+    --color-error-bg: #fed7d7;
   }
 
   .theme-minimal.dark {
@@ -102,6 +112,8 @@
     --color-accent-bg: #2d1b69;
     --color-success: #68d391;
     --color-warning: #f6ad55;
+    --color-error: #fc8181;
+    --color-error-bg: #2d1b1d;
   }
 
   body {

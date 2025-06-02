@@ -10,6 +10,7 @@ A beautiful prompt journal application with ChatGPT-like interface, built with R
 - 👤 **User Profiles** - Automatic profile creation with first names from Google OAuth
 - 🌟 **Weekly Picks** - Share and discover community recommendations
 - 🗑️ **Pick Management** - Edit and delete your own picks
+- 📸 **Image Upload** - Drag & drop image sharing for Activities (Supabase Storage)
 - 🔗 **Link Previews** - Rich previews when pasting URLs (IMDB, YouTube, etc.)
 - 🌙 **Dark Mode** - Beautiful dark/light theme toggle
 - 🎨 **Modern Fonts** - Choose from 4 professional font families
@@ -78,7 +79,22 @@ npm install
    
    Get a free API key at [http://www.omdbapi.com/apikey.aspx](http://www.omdbapi.com/apikey.aspx). If not provided, the app will use a default key with limited usage.
 
-### 6. Run the development server
+### 6. Set up Supabase Storage (for image uploads)
+
+**Note**: The Activities image upload feature uses Supabase Storage. The storage bucket and policies are automatically configured through the Supabase CLI when you run the project locally or deploy it.
+
+**Quick Setup** (run this once):
+```bash
+./scripts/setup-storage.sh
+```
+
+**Manual Setup**:
+- For local development: `supabase start`
+- For production: `supabase link --project-ref YOUR_REF && supabase db push`
+
+See `STORAGE_SETUP.md` for detailed information.
+
+### 7. Run the development server
 
 ```bash
 npm run dev
@@ -115,7 +131,8 @@ src/
 │   ├── supabase.ts       # Database client
 │   ├── setupDatabase.ts  # Database setup utilities
 │   ├── imdbSearch.ts     # IMDB/OMDB API integration
-│   └── linkPreview.ts    # General URL link preview functionality
+│   ├── linkPreview.ts    # General URL link preview functionality
+│   └── imageUpload.ts    # Image upload to Supabase Storage
 └── index.css             # Custom styles
 ```
 
@@ -127,6 +144,23 @@ src/
 - Google OAuth for secure authentication
 - Environment variables for sensitive data
 - Automatic user profile creation with data extraction from OAuth metadata
+- Secure image storage with user-based access control
+
+## 📸 Image Upload (Activities)
+
+The Activities category supports drag & drop image uploads with the following features:
+
+- **Drag & Drop Interface**: Simply drag images onto the Activities category interface
+- **File Validation**: Only accepts image files (PNG, JPG, GIF, etc.) up to 10MB each
+- **Secure Storage**: Images are stored in Supabase Storage with user-based access control
+- **Rich Previews**: Uploaded images appear as rich previews with file information
+- **Error Handling**: Clear error messages for invalid files or upload failures
+
+### Usage
+1. Select the "Activities" category
+2. Drag image files onto the interface or click to browse
+3. Images are automatically uploaded and appear as previews
+4. Submit your pick with text and/or images
 
 ## 🔗 Link Previews
 
@@ -158,6 +192,13 @@ Great tutorial: https://www.youtube.com/watch?v=abc123
 The app will automatically detect these URLs, show rich previews with images, titles, and descriptions, and replace IMDB URLs with clean movie titles.
 
 ## 🆕 Recent Updates
+
+### Image Upload for Activities
+- Added drag & drop image upload functionality for Activities category
+- Secure image storage using Supabase Storage
+- File validation and error handling
+- Rich image previews with metadata
+- User-based access control and RLS policies
 
 ### Link Preview Functionality
 - Added real link preview generation when pasting URLs
