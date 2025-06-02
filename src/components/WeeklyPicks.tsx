@@ -8,6 +8,7 @@ interface LinkPreview {
   title?: string
   description?: string
   image?: string
+  isImage?: boolean
 }
 
 interface Pick {
@@ -108,6 +109,27 @@ export const WeeklyPicks: React.FC<WeeklyPicksProps> = ({ currentWeek, currentUs
     }
   }
 
+  // Group picks by user
+  const groupPicksByUser = (picks: Pick[]) => {
+    const grouped = picks.reduce((acc, pick) => {
+      const userId = pick.userId
+      if (!acc[userId]) {
+        acc[userId] = {
+          userFirstName: pick.userFirstName || 'Anonymous User',
+          userId: userId,
+          picks: []
+        }
+      }
+      acc[userId].picks.push(pick)
+      return acc
+    }, {} as Record<string, { userFirstName: string; userId: string; picks: Pick[] }>)
+
+    // Convert to array and sort by user name
+    return Object.values(grouped).sort((a, b) => 
+      a.userFirstName.localeCompare(b.userFirstName)
+    )
+  }
+
   const getPicksByCategory = (categoryId: string) => {
     return picks.filter(pick => pick.category === categoryId)
   }
@@ -115,6 +137,8 @@ export const WeeklyPicks: React.FC<WeeklyPicksProps> = ({ currentWeek, currentUs
   const filteredPicks = selectedCategory 
     ? getPicksByCategory(selectedCategory)
     : picks
+
+  const groupedPicks = groupPicksByUser(filteredPicks)
 
   const getPicksCount = (categoryId: string) => {
     return getPicksByCategory(categoryId).length
@@ -209,122 +233,147 @@ export const WeeklyPicks: React.FC<WeeklyPicksProps> = ({ currentWeek, currentUs
           </p>
         </div>
       ) : (
-        <div className="space-y-4">
-          {filteredPicks.map((pick) => {
-            const categoryData = categories.find(c => c.id === pick.category)
-            const Icon = categoryData?.icon || MoreHorizontal
-            
-            return (
-              <div key={pick.id} className="card p-6">
-                {/* Pick Header */}
-                <div className="flex items-center gap-3 mb-4">
-                  <div 
-                    className="p-2 rounded-lg"
-                    style={{ 
-                      backgroundColor: 'var(--color-accent-bg)',
-                      color: 'var(--color-accent)'
-                    }}
-                  >
-                    <Icon size={20} />
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium" style={{ color: 'var(--color-text)' }}>
-                        {categoryData?.label}
-                      </span>
-                      <span style={{ color: 'var(--color-text-muted)' }}>•</span>
-                      <div className="flex items-center gap-1" style={{ color: 'var(--color-text-secondary)' }}>
-                        <User size={14} />
-                        <span className="text-sm">{pick.userFirstName}</span>
-                      </div>
-                    </div>
-                    <div className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
-                      {pick.createdAt.toLocaleDateString()} at {pick.createdAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </div>
-                  </div>
-                  {/* Delete button - only show for current user's picks */}
-                  {currentUser && pick.userId === currentUser.id && onDeletePick && (
-                    <button
-                      onClick={() => {
-                        if (confirm('Are you sure you want to delete this pick?')) {
-                          handleDeletePick(pick.id)
-                        }
-                      }}
-                      className="p-2 rounded-lg transition-colors"
-                      style={{ 
-                        color: 'var(--color-text-muted)',
-                        backgroundColor: 'transparent'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.color = 'var(--color-warning)'
-                        e.currentTarget.style.backgroundColor = 'var(--color-bg-tertiary)'
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.color = 'var(--color-text-muted)'
-                        e.currentTarget.style.backgroundColor = 'transparent'
-                      }}
-                      title="Delete this pick"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  )}
+        <div className="space-y-6">
+          {groupedPicks.map((userGroup) => (
+            <div key={userGroup.userId} className="space-y-4">
+              {/* User Header */}
+              <div className="flex items-center gap-3 pb-3" style={{ borderBottom: '2px solid var(--color-border)' }}>
+                <div 
+                  className="p-2 rounded-full"
+                  style={{ 
+                    backgroundColor: 'var(--color-accent-bg)',
+                    color: 'var(--color-accent)'
+                  }}
+                >
+                  <User size={20} />
                 </div>
-
-                {/* Pick Content */}
-                <div className="mb-4">
-                  <p style={{ color: 'var(--color-text)' }} className="whitespace-pre-wrap">
-                    {pick.content}
+                <div>
+                  <h4 className="text-lg font-semibold" style={{ color: 'var(--color-text)' }}>
+                    {userGroup.userFirstName}
+                  </h4>
+                  <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+                    {userGroup.picks.length} pick{userGroup.picks.length !== 1 ? 's' : ''} this week
                   </p>
                 </div>
-
-                {/* Link Previews */}
-                {pick.linkPreviews.length > 0 && (
-                  <div className="space-y-3">
-                    {pick.linkPreviews.map((preview, index) => (
-                      <div
-                        key={index}
-                        className="flex gap-4 p-4 rounded-lg"
-                        style={{ 
-                          backgroundColor: 'var(--color-bg-secondary)',
-                          border: '1px solid var(--color-border)'
-                        }}
-                      >
-                        {preview.image && (
-                          <img
-                            src={preview.image}
-                            alt={preview.title}
-                            className="w-16 h-16 object-cover rounded-lg"
-                          />
-                        )}
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-medium truncate" style={{ color: 'var(--color-text)' }}>
-                            {preview.title || 'Link Preview'}
-                          </h4>
-                          {preview.description && (
-                            <p className="text-sm mt-1 line-clamp-2" style={{ color: 'var(--color-text-secondary)' }}>
-                              {preview.description}
-                            </p>
-                          )}
-                          <a
-                            href={preview.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 text-xs mt-2 transition-colors"
-                            style={{ color: 'var(--color-accent)' }}
-                            onMouseEnter={(e) => e.currentTarget.style.textDecoration = 'underline'}
-                            onMouseLeave={(e) => e.currentTarget.style.textDecoration = 'none'}
-                          >
-                            <ExternalLink size={12} />
-                            Visit Link
-                          </a>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
               </div>
-            )
-          })}
+
+              {/* User's Picks */}
+              <div className="space-y-4 ml-6">
+                {userGroup.picks.map((pick) => {
+                  const categoryData = categories.find(c => c.id === pick.category)
+                  const Icon = categoryData?.icon || MoreHorizontal
+                  
+                  return (
+                    <div key={pick.id} className="card p-5">
+                      {/* Pick Header */}
+                      <div className="flex items-center gap-3 mb-4">
+                        <div 
+                          className="p-2 rounded-lg"
+                          style={{ 
+                            backgroundColor: 'var(--color-accent-bg)',
+                            color: 'var(--color-accent)'
+                          }}
+                        >
+                          <Icon size={18} />
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium" style={{ color: 'var(--color-text)' }}>
+                              {categoryData?.label}
+                            </span>
+                          </div>
+                          <div className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
+                            {pick.createdAt.toLocaleDateString()} at {pick.createdAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </div>
+                        </div>
+                        {/* Delete button - only show for current user's picks */}
+                        {currentUser && pick.userId === currentUser.id && onDeletePick && (
+                          <button
+                            onClick={() => {
+                              if (confirm('Are you sure you want to delete this pick?')) {
+                                handleDeletePick(pick.id)
+                              }
+                            }}
+                            className="p-2 rounded-lg transition-colors"
+                            style={{ 
+                              color: 'var(--color-text-muted)',
+                              backgroundColor: 'transparent'
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.color = 'var(--color-warning)'
+                              e.currentTarget.style.backgroundColor = 'var(--color-bg-tertiary)'
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.color = 'var(--color-text-muted)'
+                              e.currentTarget.style.backgroundColor = 'transparent'
+                            }}
+                            title="Delete this pick"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Pick Content */}
+                      <div className="mb-4">
+                        <p style={{ color: 'var(--color-text)' }} className="whitespace-pre-wrap">
+                          {pick.content}
+                        </p>
+                      </div>
+
+                      {/* Link Previews */}
+                      {pick.linkPreviews.length > 0 && (
+                        <div className="space-y-3">
+                          {pick.linkPreviews.map((preview, index) => (
+                            <div
+                              key={index}
+                              className="flex gap-4 p-4 rounded-lg"
+                              style={{ 
+                                backgroundColor: 'var(--color-bg-secondary)',
+                                border: '1px solid var(--color-border)'
+                              }}
+                            >
+                              {preview.image && (
+                                <img
+                                  src={preview.image}
+                                  alt={preview.title}
+                                  className={`object-cover rounded-lg ${preview.isImage ? 'w-20 h-20' : 'w-16 h-16'}`}
+                                />
+                              )}
+                              <div className="flex-1 min-w-0">
+                                <h4 className="font-medium truncate" style={{ color: 'var(--color-text)' }}>
+                                  {preview.title || 'Link Preview'}
+                                </h4>
+                                {preview.description && (
+                                  <p className="text-sm mt-1 line-clamp-2" style={{ color: 'var(--color-text-secondary)' }}>
+                                    {preview.description}
+                                  </p>
+                                )}
+                                {!preview.isImage && (
+                                  <a
+                                    href={preview.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-1 text-xs mt-2 transition-colors"
+                                    style={{ color: 'var(--color-accent)' }}
+                                    onMouseEnter={(e) => e.currentTarget.style.textDecoration = 'underline'}
+                                    onMouseLeave={(e) => e.currentTarget.style.textDecoration = 'none'}
+                                  >
+                                    <ExternalLink size={12} />
+                                    Visit Link
+                                  </a>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          ))}
         </div>
       )}
     </div>
