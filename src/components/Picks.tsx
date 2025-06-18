@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { Send, Film, Tv, Gamepad2, Calendar, MoreHorizontal, X, ExternalLink } from 'lucide-react'
+import { Send, Film, Gamepad2, Calendar, MoreHorizontal, X, ExternalLink } from 'lucide-react'
 import { WeeklyPicks } from './WeeklyPicks'
 import { extractIMDBId, searchIMDBById, createIMDBLinkPreview } from '../lib/imdbSearch'
 import { fetchGeneralLinkPreview } from '../lib/linkPreview'
@@ -24,15 +24,14 @@ interface PicksProps {
 }
 
 const categories = [
-  { id: 'movies', label: 'Movies', icon: Film, placeholder: 'What movie are you picking this week? Share a link or describe your choice...' },
-  { id: 'tv', label: 'TV', icon: Tv, placeholder: 'What TV show are you watching this week? Share a link or tell us about it...' },
+  { id: 'movies-tv', label: 'Movies & TV', icon: Film, placeholder: 'What movie or TV show are you picking this week? Share a link or describe your choice...' },
   { id: 'games', label: 'Video Games', icon: Gamepad2, placeholder: 'What game are you playing this week? Drop a link or describe your gaming pick...' },
   { id: 'activities', label: 'Activities', icon: Calendar, placeholder: 'What activity or experience are you picking this week? Drag & drop images or share details...' },
   { id: 'other', label: 'Other', icon: MoreHorizontal, placeholder: 'What else are you picking this week? Share your choice...' },
 ]
 
 export const Picks: React.FC<PicksProps> = ({ onSavePick, onDeletePick, currentUser }) => {
-  const [selectedCategory, setSelectedCategory] = useState('movies')
+  const [selectedCategory, setSelectedCategory] = useState('movies-tv')
   const [inputValue, setInputValue] = useState('')
   const [linkPreviews, setLinkPreviews] = useState<LinkPreview[]>([])
   const [refreshKey, setRefreshKey] = useState(0)

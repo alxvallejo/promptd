@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Film, Tv, Gamepad2, Calendar, MoreHorizontal, ExternalLink, User, Trash2, Presentation, X, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Film, Gamepad2, Calendar, MoreHorizontal, ExternalLink, User, Trash2, Presentation, X, ChevronLeft, ChevronRight } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import type { User as SupabaseUser } from '@supabase/supabase-js'
 
@@ -29,8 +29,7 @@ interface WeeklyPicksProps {
 }
 
 const categories = [
-  { id: 'movies', label: 'Movies', icon: Film },
-  { id: 'tv', label: 'TV', icon: Tv },
+  { id: 'movies-tv', label: 'Movies & TV', icon: Film },
   { id: 'games', label: 'Video Games', icon: Gamepad2 },
   { id: 'activities', label: 'Activities', icon: Calendar },
   { id: 'other', label: 'Other', icon: MoreHorizontal },
@@ -175,6 +174,14 @@ export const WeeklyPicks: React.FC<WeeklyPicksProps> = ({ currentWeek, currentUs
   }
 
   const getPicksByCategory = (categoryId: string) => {
+    // Handle the combined Movies & TV category
+    if (categoryId === 'movies-tv') {
+      return picks.filter(pick => 
+        pick.category === 'movies-tv' || 
+        pick.category === 'movies' || 
+        pick.category === 'tv'
+      )
+    }
     return picks.filter(pick => pick.category === categoryId)
   }
 
@@ -198,7 +205,16 @@ export const WeeklyPicks: React.FC<WeeklyPicksProps> = ({ currentWeek, currentUs
   // Apply both category and person filters
   let filteredPicks = picks
   if (selectedCategory) {
-    filteredPicks = filteredPicks.filter(pick => pick.category === selectedCategory)
+    // Handle the combined Movies & TV category
+    if (selectedCategory === 'movies-tv') {
+      filteredPicks = filteredPicks.filter(pick => 
+        pick.category === 'movies-tv' || 
+        pick.category === 'movies' || 
+        pick.category === 'tv'
+      )
+    } else {
+      filteredPicks = filteredPicks.filter(pick => pick.category === selectedCategory)
+    }
   }
   if (selectedPerson) {
     filteredPicks = filteredPicks.filter(pick => pick.userId === selectedPerson)
