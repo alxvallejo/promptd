@@ -3,7 +3,7 @@ import { Send, Film, Gamepad2, Calendar, MoreHorizontal, X, ExternalLink, Star, 
 import { PicksGallery } from './PicksGallery'
 import { extractIMDBId, searchIMDBById, createIMDBLinkPreview } from '../lib/imdbSearch'
 import { fetchGeneralLinkPreview } from '../lib/linkPreview'
-import { uploadImage, createImagePreview, validateDroppedFiles, updateImagePreview } from '../lib/imageUpload'
+import { uploadImage, createImagePreview, validateDroppedFiles } from '../lib/imageUpload'
 import type { User } from '@supabase/supabase-js'
 
 interface LinkPreview {

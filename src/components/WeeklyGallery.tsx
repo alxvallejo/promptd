@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Calendar, Users, Image, FileText, ExternalLink, User, Trash2, X } from 'lucide-react'
+import { Calendar, Users, Image, FileText, ExternalLink, Trash2, X } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import type { User as SupabaseUser } from '@supabase/supabase-js'
 
@@ -210,13 +210,7 @@ export const WeeklyGallery: React.FC<WeeklyGalleryProps> = ({ currentUser, onDel
     return week
   }
 
-  const getWeekDate = (weekData: WeekData) => {
-    const mostRecent = weekData.picks.reduce((latest, pick) => 
-      pick.createdAt > latest ? pick.createdAt : latest, 
-      weekData.picks[0].createdAt
-    )
-    return mostRecent.toLocaleDateString()
-  }
+
 
   if (loading) {
     return (
