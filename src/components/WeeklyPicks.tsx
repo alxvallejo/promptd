@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Film, Gamepad2, Calendar, MoreHorizontal, ExternalLink, User, Trash2, Presentation, X, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Film, Gamepad2, Calendar, MoreHorizontal, ExternalLink, User, Trash2, Presentation, X, ChevronLeft, ChevronRight, Star } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import type { User as SupabaseUser } from '@supabase/supabase-js'
 
@@ -9,6 +9,8 @@ interface LinkPreview {
   description?: string
   image?: string
   isImage?: boolean
+  rating?: number
+  review?: string
 }
 
 interface Pick {
@@ -41,6 +43,25 @@ export const WeeklyPicks: React.FC<WeeklyPicksProps> = ({ currentWeek, currentUs
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const [selectedPerson, setSelectedPerson] = useState<string | null>(null)
   const [presentationMode, setPresentationMode] = useState<{ isOpen: boolean; userGroup: any; currentSlide: number } | null>(null)
+
+  // Star Display Component (read-only)
+  const StarDisplay: React.FC<{ rating: number }> = ({ rating }) => {
+    return (
+      <div className="flex gap-1 items-center">
+        {[1, 2, 3, 4, 5].map((starValue) => (
+          <Star
+            key={starValue}
+            size={16}
+            fill={starValue <= rating ? 'var(--color-accent)' : 'none'}
+            color={starValue <= rating ? 'var(--color-accent)' : 'var(--color-text-muted)'}
+          />
+        ))}
+        <span className="text-sm ml-1" style={{ color: 'var(--color-text-secondary)' }}>
+          ({rating}/5)
+        </span>
+      </div>
+    )
+  }
 
   useEffect(() => {
     loadWeeklyPicks()
@@ -523,6 +544,24 @@ export const WeeklyPicks: React.FC<WeeklyPicksProps> = ({ currentWeek, currentUs
                                     {preview.description}
                                   </p>
                                 )}
+                                
+                                {/* Display rating and review for IMDB content */}
+                                {preview.rating && preview.rating > 0 && (
+                                  <div className="mt-2">
+                                    <StarDisplay rating={preview.rating} />
+                                  </div>
+                                )}
+                                {preview.review && (
+                                  <div className="mt-2 p-2 rounded" style={{ backgroundColor: 'var(--color-bg-tertiary)' }}>
+                                    <p className="text-sm font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>
+                                      Review:
+                                    </p>
+                                    <p className="text-sm italic" style={{ color: 'var(--color-text)' }}>
+                                      "{preview.review}"
+                                    </p>
+                                  </div>
+                                )}
+                                
                                 {!preview.isImage && (
                                   <a
                                     href={preview.url}
@@ -673,6 +712,36 @@ export const WeeklyPicks: React.FC<WeeklyPicksProps> = ({ currentWeek, currentUs
                                   {preview.description}
                                 </p>
                               )}
+                              
+                              {/* Display rating and review in presentation mode */}
+                              {preview.rating && preview.rating > 0 && (
+                                <div className="mb-4">
+                                  <div className="flex gap-2 items-center">
+                                    {[1, 2, 3, 4, 5].map((starValue) => (
+                                      <Star
+                                        key={starValue}
+                                        size={24}
+                                        fill={starValue <= preview.rating! ? 'var(--color-accent)' : 'none'}
+                                        color={starValue <= preview.rating! ? 'var(--color-accent)' : 'var(--color-text-muted)'}
+                                      />
+                                    ))}
+                                    <span className="text-xl ml-2" style={{ color: 'var(--color-text-secondary)' }}>
+                                      ({preview.rating}/5)
+                                    </span>
+                                  </div>
+                                </div>
+                              )}
+                              {preview.review && (
+                                <div className="mb-6 p-4 rounded-xl" style={{ backgroundColor: 'var(--color-bg-tertiary)' }}>
+                                  <p className="text-lg font-semibold mb-2" style={{ color: 'var(--color-text-secondary)' }}>
+                                    Review:
+                                  </p>
+                                  <p className="text-xl italic leading-relaxed" style={{ color: 'var(--color-text)' }}>
+                                    "{preview.review}"
+                                  </p>
+                                </div>
+                              )}
+                              
                               {!preview.isImage && (
                                 <a
                                   href={preview.url}

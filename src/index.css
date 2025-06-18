@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&family=DM+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600;700&family=Fira+Code:wght@300;400;500;600;700&family=Source+Serif+Pro:wght@300;400;500;600;700&family=Playfair+Display:wght@300;400;500;600;700&family=Merriweather:wght@300;400;500;600;700&family=Lato:wght@300;400;500;600;700&family=Montserrat:wght@300;400;500;600;700&family=Roboto+Slab:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&family=DM+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600;700&family=Fira+Code:wght@300;400;500;600;700&family=Source+Serif+Pro:wght@300;400;500;600;700&family=Playfair+Display:wght@300;400;500;600;700&family=Merriweather:wght@300;400;500;600;700&family=Lato:wght@300;400;500;600;700&family=Montserrat:wght@300;400;500;600;700&family=Roboto+Slab:wght@300;400;500;600;700&family=Crimson+Text:wght@400;600;700&family=Libre+Baskerville:wght@400;700&family=Cormorant+Garamond:wght@300;400;500;600;700&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -42,84 +42,92 @@
     --color-error-bg: #1f1315;
   }
 
-  /* VS Code Theme */
+  /* Glass Bubble Theme */
   .theme-vscode {
-    --color-bg: #ffffff;
-    --color-bg-secondary: #f3f3f3;
-    --color-bg-tertiary: #ebebeb;
-    --color-text: #333333;
-    --color-text-secondary: #757575;
-    --color-text-muted: #999999;
-    --color-border: #e5e5e5;
-    --color-border-muted: #f0f0f0;
-    --color-accent: #007acc;
-    --color-accent-hover: #005a9e;
-    --color-accent-bg: #e7f3ff;
-    --color-success: #28a745;
-    --color-warning: #dc3545;
-    --color-error: #dc3545;
-    --color-error-bg: #f8d7da;
+    --color-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(250, 245, 255, 0.8) 100%);
+    --color-bg-secondary: linear-gradient(135deg, rgba(240, 248, 255, 0.85) 0%, rgba(245, 240, 255, 0.75) 100%);
+    --color-bg-tertiary: linear-gradient(135deg, rgba(230, 240, 255, 0.9) 0%, rgba(240, 230, 255, 0.8) 100%);
+    --color-text: #2d1b69;
+    --color-text-secondary: #5b21b6;
+    --color-text-muted: #7c3aed;
+    --color-border: rgba(139, 92, 246, 0.3);
+    --color-border-muted: rgba(167, 139, 250, 0.2);
+    --color-accent: #8b5cf6;
+    --color-accent-hover: #7c3aed;
+    --color-accent-bg: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(167, 139, 250, 0.1) 100%);
+    --color-success: #059669;
+    --color-warning: #d97706;
+    --color-error: #dc2626;
+    --color-error-bg: linear-gradient(135deg, rgba(220, 38, 38, 0.1) 0%, rgba(248, 113, 113, 0.05) 100%);
+    --glass-shadow: 0 8px 32px rgba(139, 92, 246, 0.15);
+    --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
   }
 
   .theme-vscode.dark {
-    --color-bg: #1e1e1e;
-    --color-bg-secondary: #252526;
-    --color-bg-tertiary: #2d2d30;
-    --color-text: #cccccc;
-    --color-text-secondary: #b3b3b3;
-    --color-text-muted: #808080;
-    --color-border: #3e3e42;
-    --color-border-muted: #2d2d30;
-    --color-accent: #0e639c;
-    --color-accent-hover: #1177bb;
-    --color-accent-bg: #094771;
-    --color-success: #89d185;
-    --color-warning: #f48771;
-    --color-error: #f48771;
-    --color-error-bg: #2d1b1d;
+    --color-bg: linear-gradient(135deg, #0a0612 0%, #1a0f2e 100%);
+    --color-bg-secondary: linear-gradient(135deg, #0f0a1a 0%, #1f1435 100%);
+    --color-bg-tertiary: linear-gradient(135deg, #14102a 0%, #241940 100%);
+    --color-text: #e2e8f0;
+    --color-text-secondary: #cbd5e1;
+    --color-text-muted: #94a3b8;
+    --color-border: rgba(124, 58, 237, 0.4);
+    --color-border-muted: rgba(139, 92, 246, 0.25);
+    --color-accent: #a78bfa;
+    --color-accent-hover: #8b5cf6;
+    --color-accent-bg: linear-gradient(135deg, rgba(167, 139, 250, 0.2) 0%, rgba(139, 92, 246, 0.15) 100%);
+    --color-success: #10b981;
+    --color-warning: #f59e0b;
+    --color-error: #f87171;
+    --color-error-bg: linear-gradient(135deg, rgba(248, 113, 113, 0.15) 0%, rgba(252, 165, 165, 0.1) 100%);
+    --glass-shadow: 0 8px 32px rgba(124, 58, 237, 0.3);
+    --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
   }
 
-  /* Minimal Theme */
+  /* Minimal Theme - Desert Sand */
   .theme-minimal {
-    --color-bg: #fefefe;
-    --color-bg-secondary: #f8f9fa;
-    --color-bg-tertiary: #f1f3f4;
-    --color-text: #1a1a1a;
-    --color-text-secondary: #666666;
-    --color-text-muted: #999999;
-    --color-border: #e2e8f0;
-    --color-border-muted: #edf2f7;
-    --color-accent: #667eea;
-    --color-accent-hover: #5a67d8;
-    --color-accent-bg: #eef2ff;
-    --color-success: #48bb78;
-    --color-warning: #ed8936;
-    --color-error: #e53e3e;
-    --color-error-bg: #fed7d7;
+    --color-bg: #fefcf7;
+    --color-bg-secondary: #f7f3ed;
+    --color-bg-tertiary: #f0eae0;
+    --color-text: #3d2914;
+    --color-text-secondary: #8b6f47;
+    --color-text-muted: #a68961;
+    --color-border: #e6d7c3;
+    --color-border-muted: #f0e6d6;
+    --color-accent: #c19a6b;
+    --color-accent-hover: #a67c52;
+    --color-accent-bg: #f5efe6;
+    --color-success: #8fb069;
+    --color-warning: #d4a574;
+    --color-error: #c17b63;
+    --color-error-bg: #f8f0ed;
   }
 
   .theme-minimal.dark {
-    --color-bg: #0f0f0f;
-    --color-bg-secondary: #1a1a1a;
-    --color-bg-tertiary: #262626;
-    --color-text: #f7fafc;
-    --color-text-secondary: #b3b3b3;
-    --color-text-muted: #808080;
-    --color-border: #2d3748;
-    --color-border-muted: #1a202c;
-    --color-accent: #7c3aed;
-    --color-accent-hover: #8b5cf6;
-    --color-accent-bg: #2d1b69;
-    --color-success: #68d391;
-    --color-warning: #f6ad55;
-    --color-error: #fc8181;
-    --color-error-bg: #2d1b1d;
+    --color-bg: #1a1612;
+    --color-bg-secondary: #2a241f;
+    --color-bg-tertiary: #3a332c;
+    --color-text: #f7f1e8;
+    --color-text-secondary: #d4c4a8;
+    --color-text-muted: #a89980;
+    --color-border: #4a3f36;
+    --color-border-muted: #2a241f;
+    --color-accent: #d4a574;
+    --color-accent-hover: #e8b886;
+    --color-accent-bg: #3d2f1f;
+    --color-success: #a3c47a;
+    --color-warning: #e8b886;
+    --color-error: #d4876b;
+    --color-error-bg: #3d2a1f;
   }
 
   body {
-    background-color: var(--color-bg);
+    background: var(--color-bg);
     color: var(--color-text);
-    transition: background-color 0.3s ease, color 0.3s ease;
+    transition: background 0.3s ease, color 0.3s ease;
     margin: 0;
     min-height: 100vh;
   }
@@ -127,14 +135,14 @@
 
 @layer components {
   .chat-bubble-user {
-    background-color: var(--color-accent-bg);
+    background: var(--color-accent-bg);
     border: 1px solid var(--color-accent);
     color: var(--color-text);
     @apply rounded-2xl px-4 py-3 max-w-[80%] ml-auto;
   }
   
   .chat-bubble-assistant {
-    background-color: var(--color-bg-secondary);
+    background: var(--color-bg-secondary);
     border: 1px solid var(--color-border);
     color: var(--color-text-secondary);
     @apply rounded-2xl px-4 py-3 max-w-[80%] mr-auto;
@@ -146,12 +154,12 @@
   }
 
   .sidebar-item:hover {
-    background-color: var(--color-bg-tertiary);
+    background: var(--color-bg-tertiary);
     color: var(--color-text);
   }
   
   .sidebar-item.active {
-    background-color: var(--color-accent-bg);
+    background: var(--color-accent-bg);
     color: var(--color-accent);
     border: 1px solid var(--color-accent);
     font-weight: 500;
@@ -171,31 +179,31 @@
   }
 
   .btn-primary {
-    background-color: var(--color-accent);
+    background: var(--color-accent);
     color: white;
     border: 1px solid var(--color-accent);
     @apply px-4 py-2 rounded-lg font-medium transition-all duration-200;
   }
 
   .btn-primary:hover {
-    background-color: var(--color-accent-hover);
+    background: var(--color-accent-hover);
     border-color: var(--color-accent-hover);
   }
 
   .btn-secondary {
-    background-color: var(--color-bg-secondary);
+    background: var(--color-bg-secondary);
     color: var(--color-text);
     border: 1px solid var(--color-border);
     @apply px-4 py-2 rounded-lg font-medium transition-all duration-200;
   }
 
   .btn-secondary:hover {
-    background-color: var(--color-bg-tertiary);
+    background: var(--color-bg-tertiary);
     border-color: var(--color-border);
   }
 
   .input-field {
-    background-color: var(--color-bg);
+    background: var(--color-bg);
     color: var(--color-text);
     border: 1px solid var(--color-border);
     @apply px-3 py-2 rounded-lg focus:outline-none focus:ring-2 transition-all duration-200;
@@ -203,9 +211,69 @@
   }
 
   .card {
-    background-color: var(--color-bg);
+    background: var(--color-bg);
     border: 1px solid var(--color-border);
     @apply rounded-lg shadow-sm;
+  }
+
+  /* Glass bubble effects for vscode theme */
+  .theme-vscode .card,
+  .theme-vscode .input-field {
+    box-shadow: var(--glass-shadow), var(--glass-highlight);
+    border: 1px solid var(--color-border);
+  }
+
+  .theme-vscode .sidebar-item,
+  .theme-vscode .btn-primary,
+  .theme-vscode .btn-secondary {
+    border: none;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .theme-vscode .sidebar-item:hover,
+  .theme-vscode .btn-primary:hover,
+  .theme-vscode .btn-secondary:hover {
+    box-shadow: var(--glass-shadow), var(--glass-highlight);
+    background: var(--color-bg-secondary);
+  }
+
+  .theme-vscode .sidebar-item.active {
+    box-shadow: var(--glass-shadow), var(--glass-highlight);
+    background: var(--color-accent-bg);
+  }
+
+  .theme-vscode .btn-primary:hover {
+    background: var(--color-accent);
+  }
+
+  .theme-vscode.dark .card,
+  .theme-vscode.dark .input-field {
+    box-shadow: var(--glass-shadow), var(--glass-highlight);
+  }
+
+  .theme-vscode.dark .sidebar-item,
+  .theme-vscode.dark .btn-primary,
+  .theme-vscode.dark .btn-secondary {
+    border: none;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .theme-vscode.dark .sidebar-item:hover,
+  .theme-vscode.dark .btn-primary:hover,
+  .theme-vscode.dark .btn-secondary:hover {
+    box-shadow: var(--glass-shadow), var(--glass-highlight);
+    background: var(--color-bg-secondary);
+  }
+
+  .theme-vscode.dark .sidebar-item.active {
+    box-shadow: var(--glass-shadow), var(--glass-highlight);
+    background: var(--color-accent-bg);
+  }
+
+  .theme-vscode.dark .btn-primary:hover {
+    background: var(--color-accent);
   }
 
   .divider {
@@ -301,4 +369,7 @@
   .font-lato { font-family: 'Lato', sans-serif; }
   .font-montserrat { font-family: 'Montserrat', sans-serif; }
   .font-roboto-slab { font-family: 'Roboto Slab', serif; }
+  .font-crimson-text { font-family: 'Crimson Text', serif; }
+  .font-libre-baskerville { font-family: 'Libre Baskerville', serif; }
+  .font-cormorant { font-family: 'Cormorant Garamond', serif; }
 }

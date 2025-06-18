@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { Send, Film, Gamepad2, Calendar, MoreHorizontal, X, ExternalLink } from 'lucide-react'
-import { WeeklyPicks } from './WeeklyPicks'
+import { Send, Film, Gamepad2, Calendar, MoreHorizontal, X, ExternalLink, Star, Eye, Edit3 } from 'lucide-react'
+import { PicksGallery } from './PicksGallery'
 import { extractIMDBId, searchIMDBById, createIMDBLinkPreview } from '../lib/imdbSearch'
 import { fetchGeneralLinkPreview } from '../lib/linkPreview'
-import { uploadImage, createImagePreview, validateDroppedFiles } from '../lib/imageUpload'
+import { uploadImage, createImagePreview, validateDroppedFiles, updateImagePreview } from '../lib/imageUpload'
 import type { User } from '@supabase/supabase-js'
 
 interface LinkPreview {
@@ -15,6 +15,11 @@ interface LinkPreview {
   imdbData?: any
   isImage?: boolean
   originalFile?: File
+  rating?: number // 1-5 star rating
+  review?: string // User's review text
+  userTitle?: string // User-provided title for images
+  userComment?: string // User-provided comment for images
+  exifData?: any // EXIF data extracted from images
 }
 
 interface PicksProps {
@@ -37,6 +42,8 @@ export const Picks: React.FC<PicksProps> = ({ onSavePick, onDeletePick, currentU
   const [refreshKey, setRefreshKey] = useState(0)
   const [isDragOver, setIsDragOver] = useState(false)
   const [uploadErrors, setUploadErrors] = useState<string[]>([])
+  const [isGalleryExpanded, setIsGalleryExpanded] = useState(false)
+  const [previewingImage, setPreviewingImage] = useState<string | null>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -305,8 +312,69 @@ export const Picks: React.FC<PicksProps> = ({ onSavePick, onDeletePick, currentU
     }
   }
 
+  const updateLinkPreviewRating = (url: string, rating: number) => {
+    setLinkPreviews(prev => 
+      prev.map(p => p.url === url ? { ...p, rating } : p)
+    )
+  }
+
+  const updateLinkPreviewReview = (url: string, review: string) => {
+    setLinkPreviews(prev => 
+      prev.map(p => p.url === url ? { ...p, review } : p)
+    )
+  }
+
+  const updateImageTitle = (url: string, userTitle: string) => {
+    setLinkPreviews(prev => prev.map(preview => 
+      preview.url === url && preview.isImage ? { 
+        ...preview,
+        userTitle,
+        title: userTitle.trim() || preview.originalFile?.name || 'Image'
+      } : preview
+    ))
+  }
+
+  const updateImageComment = (url: string, userComment: string) => {
+    setLinkPreviews(prev => prev.map(preview => 
+      preview.url === url && preview.isImage ? { 
+        ...preview,
+        userComment
+      } : preview
+    ))
+  }
+
+  const toggleImagePreview = (url: string) => {
+    setPreviewingImage(previewingImage === url ? null : url)
+  }
+
+  const exitPreviewMode = () => {
+    setPreviewingImage(null)
+  }
+
   const selectedCategoryData = categories.find(cat => cat.id === selectedCategory)
   const isActivitiesCategory = selectedCategory === 'activities'
+
+  // Star Rating Component
+  const StarRating: React.FC<{ rating: number; onRatingChange: (rating: number) => void }> = ({ rating, onRatingChange }) => {
+    return (
+      <div className="flex gap-1">
+        {[1, 2, 3, 4, 5].map((starValue) => (
+          <button
+            key={starValue}
+            onClick={() => onRatingChange(starValue)}
+            className="transition-colors hover:scale-110"
+            type="button"
+          >
+            <Star
+              size={20}
+              fill={starValue <= rating ? 'var(--color-accent)' : 'none'}
+              color={starValue <= rating ? 'var(--color-accent)' : 'var(--color-text-muted)'}
+            />
+          </button>
+        ))}
+      </div>
+    )
+  }
 
   return (
     <div className="flex-1 flex flex-col h-screen">
@@ -322,21 +390,22 @@ export const Picks: React.FC<PicksProps> = ({ onSavePick, onDeletePick, currentU
 
       {/* Content Area - Input column left, Community Picks right */}
       <div 
-        className="flex-1 overflow-hidden grid grid-cols-2" 
+        className={`flex-1 overflow-hidden ${isGalleryExpanded ? 'block' : 'grid grid-cols-2'}`}
         style={{ backgroundColor: 'var(--color-bg-secondary)' }}
       >
         {/* Left Side - Input Column (50% width) */}
-        <div 
-          className="border-r flex flex-col"
-          style={{ 
-            borderColor: 'var(--color-border)',
-            backgroundColor: 'var(--color-bg)'
-          }}
-          onDragEnter={handleDragEnter}
-          onDragLeave={handleDragLeave}
-          onDragOver={handleDragOver}
-          onDrop={handleDrop}
-        >
+        {!isGalleryExpanded && (
+          <div 
+            className="border-r flex flex-col"
+            style={{ 
+              borderColor: 'var(--color-border)',
+              backgroundColor: 'var(--color-bg)'
+            }}
+            onDragEnter={handleDragEnter}
+            onDragLeave={handleDragLeave}
+            onDragOver={handleDragOver}
+            onDrop={handleDrop}
+          >
           {/* Input Column Header */}
           <div className="p-4 border-b" style={{ borderColor: 'var(--color-border)' }}>
             <h3 className="text-lg font-semibold" style={{ color: 'var(--color-text)' }}>
@@ -437,11 +506,22 @@ export const Picks: React.FC<PicksProps> = ({ onSavePick, onDeletePick, currentU
                     ) : (
                       <>
                         {preview.image && (
-                          <img
-                            src={preview.image}
-                            alt={preview.title}
-                            className={`object-cover rounded-lg ${preview.isImage ? 'w-20 h-20' : 'w-16 h-16'}`}
-                          />
+                          <div className="relative">
+                            <img
+                              src={preview.image}
+                              alt={preview.title}
+                              className={`object-cover rounded-lg ${preview.isImage ? 'w-20 h-20' : 'w-16 h-16'}`}
+                            />
+                            {preview.isImage && (
+                              <button
+                                onClick={() => toggleImagePreview(preview.url)}
+                                className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center rounded-lg opacity-0 hover:opacity-100 transition-opacity"
+                                title="Preview image"
+                              >
+                                <Eye size={16} color="white" />
+                              </button>
+                            )}
+                          </div>
                         )}
                         <div className="flex-1 min-w-0">
                           <h4 className="font-medium truncate" style={{ color: 'var(--color-text)' }}>
@@ -452,6 +532,128 @@ export const Picks: React.FC<PicksProps> = ({ onSavePick, onDeletePick, currentU
                               {preview.description}
                             </p>
                           )}
+                          
+                          {/* Image Title and Comment Fields */}
+                          {preview.isImage && (
+                            <div className="mt-3 space-y-3 p-3 rounded-lg" style={{ backgroundColor: 'var(--color-bg-tertiary)' }}>
+                              <div>
+                                <label className="block text-xs font-medium mb-2" style={{ color: 'var(--color-text-secondary)' }}>
+                                  Image Title
+                                </label>
+                                <input
+                                  type="text"
+                                  value={preview.userTitle || ''}
+                                  onChange={(e) => updateImageTitle(preview.url, e.target.value)}
+                                  placeholder="Add a title for this image..."
+                                  className="w-full p-2 text-sm rounded border"
+                                  style={{ 
+                                    backgroundColor: 'var(--color-bg)',
+                                    borderColor: 'var(--color-border)',
+                                    color: 'var(--color-text)'
+                                  }}
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-xs font-medium mb-2" style={{ color: 'var(--color-text-secondary)' }}>
+                                  Comment
+                                </label>
+                                <textarea
+                                  value={preview.userComment || ''}
+                                  onChange={(e) => updateImageComment(preview.url, e.target.value)}
+                                  placeholder="Add a comment about this image..."
+                                  className="w-full p-2 text-sm rounded border resize-none"
+                                  style={{ 
+                                    backgroundColor: 'var(--color-bg)',
+                                    borderColor: 'var(--color-border)',
+                                    color: 'var(--color-text)'
+                                  }}
+                                  rows={3}
+                                />
+                              </div>
+                              
+                              {/* EXIF Data Display */}
+                              {preview.exifData && (
+                                <div className="pt-2 border-t" style={{ borderColor: 'var(--color-border)' }}>
+                                  <p className="text-xs font-medium mb-2" style={{ color: 'var(--color-text-secondary)' }}>
+                                    Photo Information
+                                  </p>
+                                  <div className="space-y-1 text-xs" style={{ color: 'var(--color-text-muted)' }}>
+                                    {preview.exifData.dateTaken && (
+                                      <div className="flex items-center gap-2">
+                                        <span>📅</span>
+                                        <span>{
+                                          (() => {
+                                            const date = preview.exifData.dateTaken instanceof Date 
+                                              ? preview.exifData.dateTaken 
+                                              : new Date(preview.exifData.dateTaken)
+                                            return `${date.toLocaleDateString()} at ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+                                          })()
+                                        }</span>
+                                      </div>
+                                    )}
+                                    {preview.exifData.location && (
+                                      <div className="flex items-center gap-2">
+                                        <span>📍</span>
+                                        <span>Location: {preview.description?.split(' • ').find(part => part.includes(',')) || `${preview.exifData.location.latitude.toFixed(4)}, ${preview.exifData.location.longitude.toFixed(4)}`}</span>
+                                      </div>
+                                    )}
+                                    {preview.exifData.camera && (
+                                      <div className="flex items-center gap-2">
+                                        <span>📷</span>
+                                        <span>{[preview.exifData.camera.make, preview.exifData.camera.model].filter(Boolean).join(' ')}</span>
+                                      </div>
+                                    )}
+                                    {preview.exifData.settings && (
+                                      <div className="flex items-center gap-2">
+                                        <span>⚙️</span>
+                                        <span>
+                                          {[
+                                            preview.exifData.settings.fNumber && `f/${preview.exifData.settings.fNumber}`,
+                                            preview.exifData.settings.exposureTime,
+                                            preview.exifData.settings.iso && `ISO ${preview.exifData.settings.iso}`,
+                                            preview.exifData.settings.focalLength && `${preview.exifData.settings.focalLength}mm`
+                                          ].filter(Boolean).join(' • ')}
+                                        </span>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Rating and Review Fields for all links */}
+                          {!preview.isImage && (
+                            <div className="mt-3 space-y-3 p-3 rounded-lg" style={{ backgroundColor: 'var(--color-bg-tertiary)' }}>
+                              <div>
+                                <label className="block text-xs font-medium mb-2" style={{ color: 'var(--color-text-secondary)' }}>
+                                  Your Rating
+                                </label>
+                                <StarRating 
+                                  rating={preview.rating || 0} 
+                                  onRatingChange={(rating) => updateLinkPreviewRating(preview.url, rating)} 
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-xs font-medium mb-2" style={{ color: 'var(--color-text-secondary)' }}>
+                                  Your Review
+                                </label>
+                                <textarea
+                                  value={preview.review || ''}
+                                  onChange={(e) => updateLinkPreviewReview(preview.url, e.target.value)}
+                                  placeholder={preview.imdbData ? "What did you think of this movie/show?" : "What did you think about this?"}
+                                  className="w-full p-2 text-sm rounded border resize-none"
+                                  style={{ 
+                                    backgroundColor: 'var(--color-bg)',
+                                    borderColor: 'var(--color-border)',
+                                    color: 'var(--color-text)'
+                                  }}
+                                  rows={3}
+                                />
+                              </div>
+                            </div>
+                          )}
+                          
                           {!preview.isImage && (
                             <a
                               href={preview.url}
@@ -575,17 +777,124 @@ export const Picks: React.FC<PicksProps> = ({ onSavePick, onDeletePick, currentU
             </div>
           </div>
         </div>
+        )}
 
-        {/* Right Side - Community Picks Feed (50% width) */}
-        <div className="overflow-y-auto p-6">
-          <WeeklyPicks 
+        {/* Right Side - Community Gallery (50% width or full width when expanded) */}
+        <div className={`overflow-y-auto ${isGalleryExpanded ? 'w-full' : ''}`}>
+          <PicksGallery 
             key={refreshKey} 
             currentWeek={currentWeek} 
             currentUser={currentUser}
             onDeletePick={onDeletePick}
+            isExpanded={isGalleryExpanded}
+            onToggleExpanded={() => setIsGalleryExpanded(!isGalleryExpanded)}
           />
         </div>
       </div>
+
+      {/* Image Preview Modal */}
+      {previewingImage && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50"
+          onClick={exitPreviewMode}
+        >
+          <div 
+            className="relative max-w-4xl max-h-full w-full h-full flex items-center justify-center p-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {linkPreviews
+              .filter(preview => preview.url === previewingImage)
+              .map(preview => (
+                <div key={preview.url} className="relative w-full h-full max-h-[90vh] flex items-center justify-center">
+                  <img
+                    src={preview.image}
+                    alt={preview.title}
+                    className="max-w-full max-h-full object-contain rounded-lg"
+                  />
+                  
+                  {/* Edit button in top right */}
+                  <button
+                    onClick={exitPreviewMode}
+                    className="absolute top-4 right-4 p-3 rounded-full backdrop-blur-sm transition-colors"
+                    style={{ 
+                      backgroundColor: 'rgba(0, 0, 0, 0.6)',
+                      color: 'white'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.8)'
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.6)'
+                    }}
+                    title="Close preview"
+                  >
+                    <X size={20} />
+                  </button>
+
+                  {/* Overlaid text content */}
+                  {(preview.userTitle || preview.userComment) && (
+                    <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/80 via-black/40 to-transparent">
+                      <div className="space-y-3">
+                        {preview.userTitle && (
+                          <h3 className="text-2xl font-bold text-white drop-shadow-lg">
+                            {preview.userTitle}
+                          </h3>
+                        )}
+                        {preview.userComment && (
+                          <p className="text-white/90 drop-shadow-lg leading-relaxed text-lg">
+                            {preview.userComment}
+                          </p>
+                        )}
+                        
+                        {/* EXIF info */}
+                        {preview.exifData && (
+                          <div className="flex flex-wrap gap-4 text-sm text-white/70 mt-4">
+                            {preview.exifData.dateTaken && (
+                                                             <span>📅 {
+                                 (() => {
+                                   const date = preview.exifData.dateTaken instanceof Date 
+                                     ? preview.exifData.dateTaken 
+                                     : new Date(preview.exifData.dateTaken)
+                                   return `${date.toLocaleDateString()} at ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+                                 })()
+                               }</span>
+                            )}
+                            {preview.exifData.location && (
+                              <span>📍 {preview.description?.split(' • ').find(part => part.includes(',')) || 'Location'}</span>
+                            )}
+                            {preview.exifData.camera && (
+                              <span>📷 {[preview.exifData.camera.make, preview.exifData.camera.model].filter(Boolean).join(' ')}</span>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Edit mode button */}
+                  <button
+                    onClick={exitPreviewMode}
+                    className="absolute top-4 left-4 p-3 rounded-full backdrop-blur-sm transition-colors"
+                    style={{ 
+                      backgroundColor: 'rgba(59, 130, 246, 0.6)',
+                      color: 'white'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = 'rgba(59, 130, 246, 0.8)'
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = 'rgba(59, 130, 246, 0.6)'
+                    }}
+                    title="Edit image details"
+                  >
+                    <Edit3 size={20} />
+                  </button>
+                </div>
+              ))
+            }
+          </div>
+        </div>
+      )}
     </div>
   )
 } 

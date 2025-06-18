@@ -31,26 +31,26 @@ export const ColorSchemeDemo: React.FC = () => {
     },
     {
       value: 'vscode',
-      name: 'VS Code',
-      description: 'Developer-friendly colors inspired by Visual Studio Code',
+      name: 'Bubble Glass',
+      description: 'Iridescent bubble-like glass with subtle gradients and reflections',
       preview: {
-        bg: isDark ? '#1e1e1e' : '#ffffff',
-        bgSecondary: isDark ? '#252526' : '#f3f3f3',
-        text: isDark ? '#cccccc' : '#333333',
-        accent: isDark ? '#0e639c' : '#007acc',
-        border: isDark ? '#3e3e42' : '#e5e5e5',
+        bg: isDark ? 'linear-gradient(135deg, #0a0612 0%, #1a0f2e 100%)' : 'linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(250, 245, 255, 0.8) 100%)',
+        bgSecondary: isDark ? 'linear-gradient(135deg, #0f0a1a 0%, #1f1435 100%)' : 'linear-gradient(135deg, rgba(240, 248, 255, 0.85) 0%, rgba(245, 240, 255, 0.75) 100%)',
+        text: isDark ? '#e2e8f0' : '#2d1b69',
+        accent: isDark ? '#a78bfa' : '#8b5cf6',
+        border: isDark ? 'rgba(124, 58, 237, 0.3)' : 'rgba(139, 92, 246, 0.3)',
       }
     },
     {
       value: 'minimal',
-      name: 'Minimal',
-      description: 'Simple and elegant with subtle contrasts',
+      name: 'Desert',
+      description: 'Warm desert tones with peaceful, indie vibes',
       preview: {
-        bg: isDark ? '#0f0f0f' : '#fefefe',
-        bgSecondary: isDark ? '#1a1a1a' : '#f8f9fa',
-        text: isDark ? '#f7fafc' : '#1a1a1a',
-        accent: isDark ? '#7c3aed' : '#667eea',
-        border: isDark ? '#2d3748' : '#e2e8f0',
+        bg: isDark ? '#1a1612' : '#fefcf7',
+        bgSecondary: isDark ? '#2a241f' : '#f7f3ed',
+        text: isDark ? '#f7f1e8' : '#3d2914',
+        accent: isDark ? '#d4a574' : '#c19a6b',
+        border: isDark ? '#4a3f36' : '#e6d7c3',
       }
     }
   ]

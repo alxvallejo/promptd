@@ -23,6 +23,11 @@ export const fetchGeneralLinkPreview = async (url: string): Promise<LinkPreviewD
       }
     }
     
+    // Add Steam support
+    if (url.includes('store.steampowered.com')) {
+      return await fetchSteamPreview(url)
+    }
+    
     // For other URLs, we'll create a basic preview
     // In a real app, you'd use a proper link preview service
     const domain = new URL(url).hostname.replace('www.', '')
@@ -40,6 +45,72 @@ export const fetchGeneralLinkPreview = async (url: string): Promise<LinkPreviewD
       title: 'Link Preview',
       description: 'Unable to load preview',
       image: 'https://via.placeholder.com/300x200/6366f1/ffffff?text=Link'
+    }
+  }
+}
+
+const fetchSteamPreview = async (url: string): Promise<LinkPreviewData> => {
+  try {
+    // Extract Steam app ID and game name from URL
+    const appIdMatch = url.match(/\/app\/(\d+)\/([^\/]+)/)
+    
+    if (appIdMatch) {
+      const appId = appIdMatch[1]
+      const gameSlug = appIdMatch[2]
+      
+      // Convert slug to readable name
+      const gameName = gameSlug
+        .split(/[-_]/)
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ')
+      
+      // Try using a CORS proxy for Steam API
+      try {
+        const corsProxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(`https://store.steampowered.com/api/appdetails?appids=${appId}&format=json`)}`
+        
+        const response = await fetch(corsProxyUrl)
+        if (response.ok) {
+          const proxyData = await response.json()
+          const steamData = JSON.parse(proxyData.contents)
+          const appData = steamData[appId]
+          
+          if (appData && appData.success && appData.data) {
+            const gameData = appData.data
+            return {
+              url,
+              title: gameData.name || gameName,
+              description: gameData.short_description || `${gameData.genres?.map((g: any) => g.description).join(', ') || 'Game'} on Steam`,
+              image: gameData.header_image || `https://cdn.akamai.steamstatic.com/steam/apps/${appId}/header.jpg`
+            }
+          }
+        }
+      } catch (apiError) {
+        console.log('Steam API via proxy failed, using enhanced fallback:', apiError)
+      }
+      
+      // Enhanced fallback with game name and proper Steam image
+      return {
+        url,
+        title: gameName,
+        description: `Available on Steam`,
+        image: `https://cdn.akamai.steamstatic.com/steam/apps/${appId}/header.jpg`
+      }
+    }
+    
+    // Basic fallback for Steam links without proper format
+    return {
+      url,
+      title: 'Steam Game',
+      description: 'Available on Steam',
+      image: 'https://via.placeholder.com/300x200/1b2838/ffffff?text=Steam'
+    }
+  } catch (error) {
+    console.error('Error fetching Steam preview:', error)
+    return {
+      url,
+      title: 'Steam Game',
+      description: 'Available on Steam',
+      image: 'https://via.placeholder.com/300x200/1b2838/ffffff?text=Steam'
     }
   }
 }

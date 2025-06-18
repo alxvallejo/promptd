@@ -57,7 +57,7 @@ CREATE TABLE IF NOT EXISTS profiles (
 -- Create picks table
 CREATE TABLE IF NOT EXISTS picks (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  category TEXT NOT NULL CHECK (category IN ('movies', 'tv', 'games', 'activities', 'other')),
+  category TEXT NOT NULL CHECK (category IN ('movies', 'tv', 'movies-tv', 'games', 'activities', 'other')),
   content TEXT NOT NULL,
   link_previews JSONB DEFAULT '[]'::jsonb,
   week_of TEXT NOT NULL,

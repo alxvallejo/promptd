@@ -22,14 +22,14 @@ Prompt.d now features three carefully designed color schemes with improved contr
   - Warmer background tones
   - Familiar to developers using VS Code
 
-### ✨ Minimal Theme
-- **Inspiration**: Modern minimal design principles
-- **Best for**: Users who prefer clean, distraction-free interfaces
+### 🏜️ Desert Theme
+- **Inspiration**: Peaceful desert landscapes and indie aesthetics
+- **Best for**: Users who want warm, calming vibes for creative work
 - **Characteristics**:
-  - Subtle color variations for a calm experience
-  - Purple accent colors (#667eea light, #7c3aed dark)
-  - High contrast while maintaining elegance
-  - Perfect for focused work sessions
+  - Warm beige and sand color palette for tranquility
+  - Desert sand accent colors (#c19a6b light, #d4a574 dark)
+  - Earth tones that reduce eye strain
+  - Perfect for contemplative writing and indie creative sessions
 
 ## Accessibility Features
 

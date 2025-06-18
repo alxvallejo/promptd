@@ -5,6 +5,7 @@ import { Auth } from './components/Auth'
 import { Sidebar } from './components/Sidebar'
 import { ChatInterface } from './components/ChatInterface'
 import { Picks } from './components/Picks'
+import { PastPics } from './components/PastPics'
 import { AppearanceSettings } from './components/AppearanceSettings'
 import { supabase } from './lib/supabase'
 import { setupPicksTable, PICKS_TABLE_SQL } from './lib/setupDatabase'
@@ -33,6 +34,8 @@ interface LinkPreview {
   description?: string
   image?: string
   loading: boolean
+  rating?: number
+  review?: string
 }
 
 const AppContent: React.FC = () => {
@@ -44,6 +47,7 @@ const AppContent: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true)
   const [showAppearance, setShowAppearance] = useState(false)
   const [showPicks, setShowPicks] = useState(false)
+  const [showPastPics, setShowPastPics] = useState(false)
   const [dbError, setDbError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -183,11 +187,13 @@ const AppContent: React.FC = () => {
     setActiveFolder(null)
     setShowAppearance(false)
     setShowPicks(false)
+    setShowPastPics(false)
   }
 
   const handleToggleAppearance = () => {
     setShowAppearance(!showAppearance)
     setShowPicks(false)
+    setShowPastPics(false)
     // Clear active prompt when showing appearance settings
     if (!showAppearance) {
       setActivePrompt(null)
@@ -198,8 +204,20 @@ const AppContent: React.FC = () => {
   const handleTogglePicks = () => {
     setShowPicks(!showPicks)
     setShowAppearance(false)
+    setShowPastPics(false)
     // Clear active prompt when showing picks
     if (!showPicks) {
+      setActivePrompt(null)
+      setActiveFolder(null)
+    }
+  }
+
+  const handleTogglePastPics = () => {
+    setShowPastPics(!showPastPics)
+    setShowAppearance(false)
+    setShowPicks(false)
+    // Clear active prompt when showing past pics
+    if (!showPastPics) {
       setActivePrompt(null)
       setActiveFolder(null)
     }
@@ -356,6 +374,7 @@ const AppContent: React.FC = () => {
     setActiveFolder(folderId)
     setShowAppearance(false)
     setShowPicks(false)
+    setShowPastPics(false)
     
     // Find the first prompt in the selected folder
     const folderPrompts = prompts.filter(prompt => 
@@ -371,8 +390,8 @@ const AppContent: React.FC = () => {
 
   if (loading || isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-slate-50">
-        <div className="text-lg text-slate-600 dark:text-slate-400">Loading...</div>
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
+        <div className="text-lg" style={{ color: 'var(--color-text-secondary)' }}>Loading...</div>
       </div>
     )
   }
@@ -384,7 +403,7 @@ const AppContent: React.FC = () => {
   // Show database error if there's an issue
   if (dbError && showPicks) {
     return (
-      <div className="flex h-screen bg-gray-50 dark:bg-slate-50">
+      <div className="flex h-screen" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
         <Sidebar
           folders={folders}
           activeFolder={activeFolder}
@@ -395,6 +414,8 @@ const AppContent: React.FC = () => {
           onToggleAppearance={handleToggleAppearance}
           showPicks={showPicks}
           onTogglePicks={handleTogglePicks}
+          showPastPics={showPastPics}
+          onTogglePastPics={handleTogglePastPics}
         />
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center max-w-2xl p-8">
@@ -404,7 +425,7 @@ const AppContent: React.FC = () => {
             <p className="mb-6" style={{ color: 'var(--color-text-secondary)' }}>
               The Picks feature requires a database table that doesn't exist yet. Please run the following SQL in your Supabase dashboard:
             </p>
-            <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg text-left overflow-x-auto">
+            <div className="p-4 rounded-lg text-left overflow-x-auto" style={{ backgroundColor: 'var(--color-bg-tertiary)' }}>
               <pre className="text-sm" style={{ color: 'var(--color-text)' }}>
                 {PICKS_TABLE_SQL}
               </pre>
@@ -430,6 +451,10 @@ const AppContent: React.FC = () => {
       return <Picks onSavePick={handleSavePick} onDeletePick={handleDeletePick} currentUser={user} />
     }
     
+    if (showPastPics) {
+      return <PastPics currentUser={user} onDeletePick={handleDeletePick} />
+    }
+    
     return (
       <ChatInterface
         activePrompt={activePrompt}
@@ -442,7 +467,7 @@ const AppContent: React.FC = () => {
   }
 
   return (
-    <div className="flex h-screen bg-gray-50 dark:bg-slate-50">
+    <div className="flex h-screen" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
       <Sidebar
         folders={folders}
         activeFolder={activeFolder}
@@ -453,6 +478,8 @@ const AppContent: React.FC = () => {
         onToggleAppearance={handleToggleAppearance}
         showPicks={showPicks}
         onTogglePicks={handleTogglePicks}
+        showPastPics={showPastPics}
+        onTogglePastPics={handleTogglePastPics}
       />
       {renderMainContent()}
     </div>

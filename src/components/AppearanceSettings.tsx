@@ -18,6 +18,9 @@ export const AppearanceSettings: React.FC = () => {
     { value: 'font-lato', label: 'Lato', description: 'Humanist sans-serif' },
     { value: 'font-montserrat', label: 'Montserrat', description: 'Urban and modern' },
     { value: 'font-roboto-slab', label: 'Roboto Slab', description: 'Mechanical slab serif' },
+    { value: 'font-crimson-text', label: 'Crimson Text', description: 'Classic serif for reading' },
+    { value: 'font-libre-baskerville', label: 'Libre Baskerville', description: 'Traditional serif beauty' },
+    { value: 'font-cormorant', label: 'Cormorant Garamond', description: 'Elegant display serif' },
   ]
 
   return (

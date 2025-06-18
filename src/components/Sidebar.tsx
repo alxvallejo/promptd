@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Plus, Folder, MessageSquare, Moon, Sun, User, LogOut, Palette, Star } from 'lucide-react'
+import { Plus, Folder, MessageSquare, Moon, Sun, User, LogOut, Palette, Star, Clock } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { useTheme } from '../context/ThemeContext'
 import { supabase } from '../lib/supabase'
@@ -14,6 +14,8 @@ interface SidebarProps {
   onToggleAppearance: () => void
   showPicks: boolean
   onTogglePicks: () => void
+  showPastPics: boolean
+  onTogglePastPics: () => void
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -26,6 +28,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onToggleAppearance,
   showPicks,
   onTogglePicks,
+  showPastPics,
+  onTogglePastPics,
 }) => {
   const { signOut, user } = useAuth()
   const { isDark, toggleTheme } = useTheme()
@@ -103,6 +107,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <Star size={18} />
           Picks
         </div>
+        <div
+          className={`sidebar-item ${showPastPics ? 'active' : ''}`}
+          onClick={onTogglePastPics}
+        >
+          <Clock size={18} />
+          Past Picks
+        </div>
       </div>
 
       {/* Folders */}
@@ -124,7 +135,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
           
           <div
-            className={`sidebar-item ${activeFolder === null && !showPicks && !showAppearance ? 'active' : ''}`}
+            className={`sidebar-item ${activeFolder === null && !showPicks && !showAppearance && !showPastPics ? 'active' : ''}`}
             onClick={() => onFolderSelect(null)}
           >
             <MessageSquare size={18} />
@@ -145,14 +156,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       </div>
 
       {/* Bottom Actions */}
-      <div style={{ 
-        borderTop: '1px solid var(--color-border)',
-        height: '20vh',
-        padding: '24px',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'flex-start'
-      }}>
+      <div className="p-6 pb-8" style={{ borderTop: '1px solid var(--color-border)' }}>
         <div className="space-y-2">
           <button
             onClick={toggleTheme}

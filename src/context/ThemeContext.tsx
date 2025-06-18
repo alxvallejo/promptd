@@ -37,7 +37,10 @@ const fontClasses = [
   'font-merriweather',
   'font-lato',
   'font-montserrat',
-  'font-roboto-slab'
+  'font-roboto-slab',
+  'font-crimson-text',
+  'font-libre-baskerville',
+  'font-cormorant'
 ]
 
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {

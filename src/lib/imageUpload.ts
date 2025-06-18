@@ -1,10 +1,30 @@
 import { supabase } from './supabase'
 import imageCompression from 'browser-image-compression'
+import exifr from 'exifr'
 
 export interface ImageUploadResult {
   url: string
   path: string
   error?: string
+}
+
+export interface ExifData {
+  dateTaken?: Date
+  location?: {
+    latitude: number
+    longitude: number
+    altitude?: number
+  }
+  camera?: {
+    make?: string
+    model?: string
+  }
+  settings?: {
+    iso?: number
+    fNumber?: number
+    exposureTime?: string
+    focalLength?: number
+  }
 }
 
 export interface ImagePreview {
@@ -16,6 +36,97 @@ export interface ImagePreview {
   isImage: true
   originalFile?: File
   compressedFile?: File
+  userTitle?: string
+  userComment?: string
+  exifData?: ExifData
+}
+
+// Extract EXIF data from image file
+const extractExifData = async (file: File): Promise<ExifData | null> => {
+  try {
+    const exifData = await exifr.parse(file, {
+      gps: true,
+      pick: [
+        'DateTimeOriginal',
+        'CreateDate', 
+        'DateTime',
+        'GPSLatitude',
+        'GPSLongitude', 
+        'GPSAltitude',
+        'Make',
+        'Model',
+        'ISO',
+        'FNumber',
+        'ExposureTime',
+        'FocalLength'
+      ]
+    })
+
+    if (!exifData) return null
+
+    const result: ExifData = {}
+
+    // Extract date taken
+    const dateTaken = exifData.DateTimeOriginal || exifData.CreateDate || exifData.DateTime
+    if (dateTaken) {
+      result.dateTaken = new Date(dateTaken)
+    }
+
+    // Extract GPS location
+    if (exifData.GPSLatitude && exifData.GPSLongitude) {
+      result.location = {
+        latitude: exifData.GPSLatitude,
+        longitude: exifData.GPSLongitude,
+        altitude: exifData.GPSAltitude
+      }
+    }
+
+    // Extract camera info
+    if (exifData.Make || exifData.Model) {
+      result.camera = {
+        make: exifData.Make,
+        model: exifData.Model
+      }
+    }
+
+    // Extract camera settings
+    if (exifData.ISO || exifData.FNumber || exifData.ExposureTime || exifData.FocalLength) {
+      result.settings = {
+        iso: exifData.ISO,
+        fNumber: exifData.FNumber,
+        exposureTime: exifData.ExposureTime ? `1/${Math.round(1 / exifData.ExposureTime)}s` : undefined,
+        focalLength: exifData.FocalLength
+      }
+    }
+
+    return Object.keys(result).length > 0 ? result : null
+  } catch (error) {
+    console.log('Could not extract EXIF data:', error)
+    return null
+  }
+}
+
+// Format location for display
+const formatLocation = async (latitude: number, longitude: number): Promise<string> => {
+  try {
+    // Use reverse geocoding to get readable location
+    const response = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`)
+    if (response.ok) {
+      const data = await response.json()
+      if (data.city && data.countryName) {
+        return `${data.city}, ${data.countryName}`
+      } else if (data.locality && data.countryName) {
+        return `${data.locality}, ${data.countryName}`
+      } else if (data.countryName) {
+        return data.countryName
+      }
+    }
+  } catch (error) {
+    console.log('Could not reverse geocode location:', error)
+  }
+  
+  // Fallback to coordinates
+  return `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`
 }
 
 // Compress image to ensure it's under 2MB
@@ -121,21 +232,37 @@ export const deleteImage = async (path: string): Promise<boolean> => {
   }
 }
 
-// Create image preview object
+// Create image preview object with EXIF data
 export const createImagePreview = async (file: File, url: string): Promise<ImagePreview> => {
   try {
     // Compress the image for preview
     const compressedFile = await compressImage(file)
     
+    // Extract EXIF data
+    const exifData = await extractExifData(file) || undefined
+    
+    // Build description with EXIF info
+    let description = `Image • ${formatFileSize(file.size)} → ${formatFileSize(compressedFile.size)}`
+    
+    if (exifData?.dateTaken) {
+      description += ` • ${exifData.dateTaken.toLocaleDateString()}`
+    }
+    
+    if (exifData?.location) {
+      const locationStr = await formatLocation(exifData.location.latitude, exifData.location.longitude)
+      description += ` • ${locationStr}`
+    }
+    
     return {
       url,
       title: file.name,
-      description: `Image • ${formatFileSize(file.size)} → ${formatFileSize(compressedFile.size)}`,
+      description,
       image: url,
       loading: false,
       isImage: true,
       originalFile: file,
-      compressedFile
+      compressedFile,
+      exifData
     }
   } catch (error) {
     // Fallback to original file if compression fails
@@ -148,6 +275,16 @@ export const createImagePreview = async (file: File, url: string): Promise<Image
       isImage: true,
       originalFile: file
     }
+  }
+}
+
+// Update image preview with user inputs
+export const updateImagePreview = (preview: ImagePreview, userTitle: string, userComment: string): ImagePreview => {
+  return {
+    ...preview,
+    userTitle: userTitle.trim() || undefined,
+    userComment: userComment.trim() || undefined,
+    title: userTitle.trim() || preview.originalFile?.name || 'Image'
   }
 }
 
