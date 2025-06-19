@@ -29,18 +29,7 @@ const fontClasses = [
   'font-inter',
   'font-poppins', 
   'font-space-grotesk',
-  'font-dm-sans',
-  'font-jetbrains-mono',
-  'font-fira-code',
-  'font-source-serif',
-  'font-playfair',
-  'font-merriweather',
-  'font-lato',
-  'font-montserrat',
-  'font-roboto-slab',
-  'font-crimson-text',
-  'font-libre-baskerville',
-  'font-cormorant'
+  'font-lexend-deca'
 ]
 
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
@@ -50,7 +39,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   })
 
   const [fontFamily, setFontFamily] = useState(() => {
-    return localStorage.getItem('fontFamily') || 'font-inter'
+    return localStorage.getItem('fontFamily') || 'font-lexend-deca'
   })
 
   const [colorScheme, setColorScheme] = useState<ColorScheme>(() => {

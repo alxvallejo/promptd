@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
-import { Plus, Folder, MessageSquare, Moon, Sun, User, LogOut, Palette, Star, Clock } from 'lucide-react'
+import { Plus, Folder, MessageSquare, Moon, Sun, User, LogOut, Palette } from 'lucide-react'
+import { Sparkle, Archive } from 'phosphor-react'
 import { useAuth } from '../context/AuthContext'
 import { useTheme } from '../context/ThemeContext'
 import { supabase } from '../lib/supabase'
@@ -7,6 +8,7 @@ import { supabase } from '../lib/supabase'
 interface SidebarProps {
   folders: Array<{ id: string; name: string }>
   activeFolder: string | null
+  activePrompt: any | null
   onFolderSelect: (folderId: string | null) => void
   onNewFolder: () => void
   onNewPrompt: () => void
@@ -21,6 +23,7 @@ interface SidebarProps {
 export const Sidebar: React.FC<SidebarProps> = ({
   folders,
   activeFolder,
+  activePrompt,
   onFolderSelect,
   onNewFolder,
   onNewPrompt,
@@ -62,6 +65,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   const displayName = userFirstName || user?.email?.split('@')[0] || 'User'
 
+  // Determine if we're in "new prompt" mode
+  const isNewPromptMode = !showPicks && !showPastPics && !showAppearance && !activePrompt
+
   return (
     <div className="w-64 h-screen flex flex-col" style={{ 
       backgroundColor: 'var(--color-bg-secondary)', 
@@ -80,17 +86,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
           onClick={onNewPrompt}
           className="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200"
           style={{
-            backgroundColor: 'var(--color-accent-bg)',
-            color: 'var(--color-accent)',
-            border: '1px solid var(--color-accent)'
+            backgroundColor: isNewPromptMode ? 'var(--color-accent-bg)' : 'transparent',
+            color: isNewPromptMode ? 'var(--color-accent)' : 'var(--color-text-secondary)',
+            border: isNewPromptMode ? '1px solid var(--color-accent)' : '1px solid var(--color-border)'
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.backgroundColor = 'var(--color-accent)'
             e.currentTarget.style.color = 'white'
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = 'var(--color-accent-bg)'
-            e.currentTarget.style.color = 'var(--color-accent)'
+            e.currentTarget.style.backgroundColor = isNewPromptMode ? 'var(--color-accent-bg)' : 'transparent'
+            e.currentTarget.style.color = isNewPromptMode ? 'var(--color-accent)' : 'var(--color-text-secondary)'
           }}
         >
           <Plus size={18} />
@@ -104,14 +110,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
           className={`sidebar-item ${showPicks ? 'active' : ''}`}
           onClick={onTogglePicks}
         >
-          <Star size={18} />
+          <Sparkle size={18} weight="duotone" />
           Picks
         </div>
         <div
           className={`sidebar-item ${showPastPics ? 'active' : ''}`}
           onClick={onTogglePastPics}
         >
-          <Clock size={18} />
+          <Archive size={18} weight="duotone" />
           Past Picks
         </div>
       </div>

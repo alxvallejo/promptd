@@ -46,7 +46,7 @@ const AppContent: React.FC = () => {
   const [activePrompt, setActivePrompt] = useState<Prompt | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [showAppearance, setShowAppearance] = useState(false)
-  const [showPicks, setShowPicks] = useState(false)
+  const [showPicks, setShowPicks] = useState(true)
   const [showPastPics, setShowPastPics] = useState(false)
   const [dbError, setDbError] = useState<string | null>(null)
 
@@ -407,6 +407,7 @@ const AppContent: React.FC = () => {
         <Sidebar
           folders={folders}
           activeFolder={activeFolder}
+          activePrompt={activePrompt}
           onFolderSelect={handleFolderSelect}
           onNewFolder={handleNewFolder}
           onNewPrompt={handleNewPrompt}
@@ -471,6 +472,7 @@ const AppContent: React.FC = () => {
       <Sidebar
         folders={folders}
         activeFolder={activeFolder}
+        activePrompt={activePrompt}
         onFolderSelect={handleFolderSelect}
         onNewFolder={handleNewFolder}
         onNewPrompt={handleNewPrompt}

@@ -38,7 +38,7 @@ interface WeeklyGalleryProps {
 const categories = [
   { id: 'movies-tv', label: 'Movies & TV', color: '#e11d48' },
   { id: 'games', label: 'Video Games', color: '#7c3aed' },
-  { id: 'activities', label: 'Activities', color: '#059669' },
+  { id: 'activities', label: 'Pics', color: '#059669' },
   { id: 'other', label: 'Other', color: '#dc2626' },
 ]
 

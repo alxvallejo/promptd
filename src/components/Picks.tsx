@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { Send, Film, Gamepad2, Calendar, MoreHorizontal, X, ExternalLink, Star, Eye, Edit3 } from 'lucide-react'
+import { Send, Film, Gamepad2, Camera, MoreHorizontal, X, ExternalLink, Star, Eye, Edit3 } from 'lucide-react'
 import { PicksGallery } from './PicksGallery'
 import { extractIMDBId, searchIMDBById, createIMDBLinkPreview } from '../lib/imdbSearch'
 import { fetchGeneralLinkPreview } from '../lib/linkPreview'
@@ -31,7 +31,7 @@ interface PicksProps {
 const categories = [
   { id: 'movies-tv', label: 'Movies & TV', icon: Film, placeholder: 'What movie or TV show are you picking this week? Share a link or describe your choice...' },
   { id: 'games', label: 'Video Games', icon: Gamepad2, placeholder: 'What game are you playing this week? Drop a link or describe your gaming pick...' },
-  { id: 'activities', label: 'Activities', icon: Calendar, placeholder: 'What activity or experience are you picking this week? Drag & drop images or share details...' },
+  { id: 'activities', label: 'Pics', icon: Camera, placeholder: 'Share your photos and memories from this week! Drag & drop images or share details...' },
   { id: 'other', label: 'Other', icon: MoreHorizontal, placeholder: 'What else are you picking this week? Share your choice...' },
 ]
 
@@ -737,19 +737,6 @@ export const Picks: React.FC<PicksProps> = ({ onSavePick, onDeletePick, currentU
                   >
                     <Icon size={16} />
                     {category.label}
-                    {category.id === 'activities' && (
-                      <span 
-                        className="text-xs px-1.5 py-0.5 rounded-full font-medium"
-                        style={{
-                          backgroundColor: isSelected ? 'rgba(255,255,255,0.2)' : 'var(--color-accent)',
-                          color: isSelected ? 'white' : 'white',
-                          fontSize: '10px'
-                        }}
-                        title="Drag & drop images supported"
-                      >
-                        📷
-                      </span>
-                    )}
                   </button>
                 )
               })}

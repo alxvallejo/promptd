@@ -9,18 +9,7 @@ export const AppearanceSettings: React.FC = () => {
     { value: 'font-inter', label: 'Inter', description: 'Clean and modern' },
     { value: 'font-poppins', label: 'Poppins', description: 'Friendly and geometric' },
     { value: 'font-space-grotesk', label: 'Space Grotesk', description: 'Futuristic and bold' },
-    { value: 'font-dm-sans', label: 'DM Sans', description: 'Professional and readable' },
-    { value: 'font-jetbrains-mono', label: 'JetBrains Mono', description: 'Developer-focused monospace' },
-    { value: 'font-fira-code', label: 'Fira Code', description: 'Code-friendly with ligatures' },
-    { value: 'font-source-serif', label: 'Source Serif Pro', description: 'Elegant serif typeface' },
-    { value: 'font-playfair', label: 'Playfair Display', description: 'Sophisticated and dramatic' },
-    { value: 'font-merriweather', label: 'Merriweather', description: 'Highly readable serif' },
-    { value: 'font-lato', label: 'Lato', description: 'Humanist sans-serif' },
-    { value: 'font-montserrat', label: 'Montserrat', description: 'Urban and modern' },
-    { value: 'font-roboto-slab', label: 'Roboto Slab', description: 'Mechanical slab serif' },
-    { value: 'font-crimson-text', label: 'Crimson Text', description: 'Classic serif for reading' },
-    { value: 'font-libre-baskerville', label: 'Libre Baskerville', description: 'Traditional serif beauty' },
-    { value: 'font-cormorant', label: 'Cormorant Garamond', description: 'Elegant display serif' },
+    { value: 'font-lexend-deca', label: 'Lexend Deca', description: 'Optimized for enhanced readability' },
   ]
 
   return (

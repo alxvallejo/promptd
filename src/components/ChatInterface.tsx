@@ -228,7 +228,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                 Your personal prompt journal
               </p>
               <p style={{ color: 'var(--color-text-muted)' }}>
-                Paste your prompt below to begin a new conversation
+                Prompts are really just snippets of thoughts you need to remember. If it's a prompt for AI great, if not, it's just a note taking app.
               </p>
             </div>
           </div>

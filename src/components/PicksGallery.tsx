@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Film, Gamepad2, Calendar, MoreHorizontal, ExternalLink, User, Trash2, X, Maximize2, Minimize2, Users, Eye, Filter, ChevronDown, ChevronUp } from 'lucide-react'
+import { Film, Gamepad2, Camera, MoreHorizontal, ExternalLink, User, Trash2, X, Maximize2, Minimize2, Users, Eye, Filter, ChevronDown, ChevronUp } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import type { User as SupabaseUser } from '@supabase/supabase-js'
 
@@ -38,7 +38,7 @@ interface PicksGalleryProps {
 const categories = [
   { id: 'movies-tv', label: 'Movies & TV', icon: Film },
   { id: 'games', label: 'Video Games', icon: Gamepad2 },
-  { id: 'activities', label: 'Activities', icon: Calendar },
+  { id: 'activities', label: 'Pics', icon: Camera },
   { id: 'other', label: 'Other', icon: MoreHorizontal },
 ]
 
