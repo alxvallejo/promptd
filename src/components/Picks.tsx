@@ -1,9 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { Send, Film, Gamepad2, Camera, MoreHorizontal, X, ExternalLink, Star, Eye, Edit3 } from 'lucide-react'
+import { Send, Film, Gamepad2, Camera, MoreHorizontal, X, ExternalLink, Star, Eye, Edit3, AlertTriangle } from 'lucide-react'
 import { PicksGallery } from './PicksGallery'
 import { extractIMDBId, searchIMDBById, createIMDBLinkPreview } from '../lib/imdbSearch'
 import { fetchGeneralLinkPreview } from '../lib/linkPreview'
 import { uploadImage, createImagePreview, validateDroppedFiles } from '../lib/imageUpload'
+import { supabase } from '../lib/supabase'
 import type { User } from '@supabase/supabase-js'
 
 interface LinkPreview {
@@ -44,8 +45,13 @@ export const Picks: React.FC<PicksProps> = ({ onSavePick, onDeletePick, currentU
   const [uploadErrors, setUploadErrors] = useState<string[]>([])
   const [isGalleryExpanded, setIsGalleryExpanded] = useState(false)
   const [previewingImage, setPreviewingImage] = useState<string | null>(null)
+  const [userWeeklyPicksCount, setUserWeeklyPicksCount] = useState(0)
+  const [weeklyPicksLoading, setWeeklyPicksLoading] = useState(false)
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // Constants
+  const WEEKLY_PICK_LIMIT = 4
 
   // Get current week string
   const getCurrentWeek = () => {
@@ -62,6 +68,34 @@ export const Picks: React.FC<PicksProps> = ({ onSavePick, onDeletePick, currentU
 
   const currentWeek = getCurrentWeek()
 
+  // Load user's weekly picks count
+  const loadUserWeeklyPicksCount = async () => {
+    if (!currentUser) {
+      setUserWeeklyPicksCount(0)
+      return
+    }
+
+    try {
+      setWeeklyPicksLoading(true)
+      const { data, error } = await supabase
+        .from('picks')
+        .select('id')
+        .eq('user_id', currentUser.id)
+        .eq('week_of', currentWeek)
+
+      if (error) {
+        console.error('Error loading user weekly picks count:', error)
+        return
+      }
+
+      setUserWeeklyPicksCount(data?.length || 0)
+    } catch (error) {
+      console.error('Error loading user weekly picks count:', error)
+    } finally {
+      setWeeklyPicksLoading(false)
+    }
+  }
+
   useEffect(() => {
     if (inputRef.current) {
       inputRef.current.focus()
@@ -69,6 +103,10 @@ export const Picks: React.FC<PicksProps> = ({ onSavePick, onDeletePick, currentU
     // Clear upload errors when switching categories
     setUploadErrors([])
   }, [selectedCategory])
+
+  useEffect(() => {
+    loadUserWeeklyPicksCount()
+  }, [currentUser, currentWeek, refreshKey])
 
   // Extract URLs from text
   const extractUrls = (text: string): string[] => {
@@ -278,6 +316,12 @@ export const Picks: React.FC<PicksProps> = ({ onSavePick, onDeletePick, currentU
   const handleSubmit = async () => {
     if (!inputValue.trim() && linkPreviews.length === 0) return
 
+    // Check weekly pick limit
+    if (userWeeklyPicksCount >= WEEKLY_PICK_LIMIT) {
+      alert(`You've reached your weekly limit of ${WEEKLY_PICK_LIMIT} picks. You can submit more picks next week!`)
+      return
+    }
+
     try {
       await onSavePick({
         category: selectedCategory,
@@ -289,6 +333,8 @@ export const Picks: React.FC<PicksProps> = ({ onSavePick, onDeletePick, currentU
       setInputValue('')
       setLinkPreviews([])
       setUploadErrors([])
+      // Update weekly picks count immediately
+      setUserWeeklyPicksCount(prev => prev + 1)
       // Trigger refresh of weekly picks
       setRefreshKey(prev => prev + 1)
     } catch (error) {
@@ -704,6 +750,28 @@ export const Picks: React.FC<PicksProps> = ({ onSavePick, onDeletePick, currentU
             borderColor: 'var(--color-border)',
             backgroundColor: 'var(--color-bg)'
           }}>
+            {/* Weekly Picks Limit Message */}
+            {currentUser && !weeklyPicksLoading && (
+              <div className={`flex items-center gap-2 p-3 rounded-lg text-sm ${
+                userWeeklyPicksCount >= WEEKLY_PICK_LIMIT 
+                  ? 'bg-red-50 border border-red-200 text-red-700 dark:bg-red-900/20 dark:border-red-800 dark:text-red-300'
+                  : userWeeklyPicksCount >= WEEKLY_PICK_LIMIT - 1
+                  ? 'bg-yellow-50 border border-yellow-200 text-yellow-700 dark:bg-yellow-900/20 dark:border-yellow-800 dark:text-yellow-300'
+                  : 'bg-blue-50 border border-blue-200 text-blue-700 dark:bg-blue-900/20 dark:border-blue-800 dark:text-blue-300'
+              }`}>
+                <AlertTriangle size={16} />
+                <span>
+                  {userWeeklyPicksCount >= WEEKLY_PICK_LIMIT ? (
+                    `You've submitted all ${WEEKLY_PICK_LIMIT} picks for this week. New picks available next week!`
+                  ) : userWeeklyPicksCount >= WEEKLY_PICK_LIMIT - 1 ? (
+                    `You have ${WEEKLY_PICK_LIMIT - userWeeklyPicksCount} pick remaining this week (${userWeeklyPicksCount}/${WEEKLY_PICK_LIMIT})`
+                  ) : (
+                    `You have ${WEEKLY_PICK_LIMIT - userWeeklyPicksCount} picks remaining this week (${userWeeklyPicksCount}/${WEEKLY_PICK_LIMIT})`
+                  )}
+                </span>
+              </div>
+            )}
+
             {/* Category Selection */}
             <div className="flex gap-2 flex-wrap">
               {categories.map((category) => {
@@ -755,9 +823,10 @@ export const Picks: React.FC<PicksProps> = ({ onSavePick, onDeletePick, currentU
               />
               <button
                 onClick={handleSubmit}
-                disabled={!inputValue.trim() && linkPreviews.length === 0}
+                disabled={(!inputValue.trim() && linkPreviews.length === 0) || userWeeklyPicksCount >= WEEKLY_PICK_LIMIT}
                 className="btn-primary rounded-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center self-end"
                 style={{ minWidth: '48px', height: '48px' }}
+                title={userWeeklyPicksCount >= WEEKLY_PICK_LIMIT ? 'Weekly pick limit reached' : 'Submit pick'}
               >
                 <Send size={18} />
               </button>

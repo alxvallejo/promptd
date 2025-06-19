@@ -1,0 +1,56 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Subtle noise texture -->
+    <filter id="noise">
+      <feTurbulence baseFrequency="0.9" numOctaves="1" result="noise"/>
+      <feColorMatrix in="noise" type="saturate" values="0"/>
+      <feComponentTransfer>
+        <feFuncA type="discrete" tableValues="0.02"/>
+      </feComponentTransfer>
+      <feComposite operator="over" in2="SourceGraphic"/>
+    </filter>
+    
+    <!-- Gradient background -->
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Subtle grid pattern -->
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+    </pattern>
+  </defs>
+  
+  <!-- Background with gradient -->
+  <rect width="1200" height="630" fill="url(#bgGradient)"/>
+  
+  <!-- Grid overlay -->
+  <rect width="1200" height="630" fill="url(#grid)"/>
+  
+  <!-- Noise texture overlay -->
+  <rect width="1200" height="630" filter="url(#noise)" fill="rgba(255,255,255,0.02)"/>
+  
+  <!-- Main content -->
+  <g transform="translate(100, 150)">
+    <!-- App title -->
+    <text x="0" y="80" font-family="Inter, system-ui, sans-serif" font-size="72" font-weight="700" fill="white" opacity="0.95">
+      Prompt-D
+    </text>
+    
+    <!-- Subtitle -->
+    <text x="0" y="140" font-family="Inter, system-ui, sans-serif" font-size="32" font-weight="400" fill="rgba(255,255,255,0.8)">
+      Weekly Picks & Memories
+    </text>
+    
+    <!-- Description -->
+    <text x="0" y="200" font-family="Inter, system-ui, sans-serif" font-size="24" font-weight="300" fill="rgba(255,255,255,0.7)">
+      Share your favorite movies, shows, activities, and photos
+    </text>
+    
+    <!-- Decorative elements -->
+    <circle cx="800" cy="100" r="120" fill="rgba(255,255,255,0.08)" opacity="0.6"/>
+    <circle cx="900" cy="200" r="80" fill="rgba(255,255,255,0.06)" opacity="0.4"/>
+    <circle cx="750" cy="250" r="60" fill="rgba(255,255,255,0.04)" opacity="0.3"/>
+  </g>
+</svg> 
