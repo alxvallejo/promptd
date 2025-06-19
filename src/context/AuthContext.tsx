@@ -51,11 +51,51 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, [])
 
   const signOut = async () => {
+    console.log('Sign out initiated...')
+    
+    // Skip Supabase entirely and force manual logout
+    console.log('Forcing manual logout to avoid 403 errors...')
+    
+    // Clear user state immediately
+    setUser(null)
+    console.log('User state cleared')
+    
+    // Clear all possible auth storage
     try {
-      await supabase.auth.signOut()
-    } catch (error) {
-      console.error('Error signing out:', error)
+      // Clear localStorage
+      console.log('Clearing localStorage...')
+      Object.keys(localStorage).forEach(key => {
+        if (key.includes('supabase') || key.includes('sb-') || key.includes('auth')) {
+          console.log('Removing localStorage key:', key)
+          localStorage.removeItem(key)
+        }
+      })
+      
+      // Clear sessionStorage
+      console.log('Clearing sessionStorage...')
+      sessionStorage.clear()
+      
+      // Also try to clear the specific Supabase auth key patterns
+      const possibleKeys = [
+        'supabase.auth.token',
+        'sb-auth-token',
+        'supabase-auth-token'
+      ]
+      
+      possibleKeys.forEach(key => {
+        localStorage.removeItem(key)
+        sessionStorage.removeItem(key)
+      })
+      
+    } catch (storageError) {
+      console.error('Error clearing storage:', storageError)
     }
+    
+    console.log('About to reload page...')
+    // Force reload to ensure clean state
+    setTimeout(() => {
+      window.location.reload()
+    }, 100)
   }
 
   const value = {

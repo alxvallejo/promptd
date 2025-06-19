@@ -395,7 +395,7 @@ export const PicksGallery: React.FC<PicksGalleryProps> = ({
               </button>
             )}
             
-            <h3 className="text-3xl font-bold mb-3 flex items-center gap-3 justify-center" style={{ color: 'var(--color-text)' }}>
+            <h3 className="text-3xl font-bold mb-3 flex items-center gap-3 justify-center gradient-text">
               <Users size={32} style={{ color: 'var(--color-accent)' }} />
               Gallery
             </h3>

@@ -6,6 +6,7 @@ import { useTheme } from '../context/ThemeContext'
 import { supabase } from '../lib/supabase'
 import { BookmarkButton } from './BookmarkButton'
 
+
 interface SidebarProps {
   folders: Array<{ id: string; name: string }>
   activeFolder: string | null
@@ -78,11 +79,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
       <div className="p-6" style={{ borderBottom: '1px solid var(--color-border)' }}>
         <div className="flex items-center gap-4">
           <img 
-            src="/logo.png" 
+            src="/logo_transparent.png" 
             alt="Prompt-D Logo" 
             className="w-16 h-16 flex-shrink-0 object-contain"
           />
-          <h1 className="text-3xl font-bold" style={{ color: 'var(--color-text)' }}>
+          <h1 className="text-3xl font-bold gradient-text">
             Prompt.d
           </h1>
         </div>
@@ -92,19 +93,25 @@ export const Sidebar: React.FC<SidebarProps> = ({
       <div className="p-4">
         <button
           onClick={onNewPrompt}
-          className="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200"
+          className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+            isNewPromptMode ? 'gradient-button' : ''
+          }`}
           style={{
-            backgroundColor: isNewPromptMode ? 'var(--color-accent-bg)' : 'transparent',
-            color: isNewPromptMode ? 'var(--color-accent)' : 'var(--color-text-secondary)',
-            border: isNewPromptMode ? '1px solid var(--color-accent)' : '1px solid var(--color-border)'
+            backgroundColor: isNewPromptMode ? undefined : 'transparent',
+            color: isNewPromptMode ? 'white' : 'var(--color-text-secondary)',
+            border: isNewPromptMode ? 'none' : '1px solid var(--color-border)'
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = 'var(--color-accent)'
-            e.currentTarget.style.color = 'white'
+            if (!isNewPromptMode) {
+              e.currentTarget.style.backgroundColor = 'var(--color-accent)'
+              e.currentTarget.style.color = 'white'
+            }
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = isNewPromptMode ? 'var(--color-accent-bg)' : 'transparent'
-            e.currentTarget.style.color = isNewPromptMode ? 'var(--color-accent)' : 'var(--color-text-secondary)'
+            if (!isNewPromptMode) {
+              e.currentTarget.style.backgroundColor = 'transparent'
+              e.currentTarget.style.color = 'var(--color-text-secondary)'
+            }
           }}
         >
           <Plus size={18} />

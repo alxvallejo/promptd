@@ -3,7 +3,7 @@ import { Auth as SupabaseAuth } from '@supabase/auth-ui-react'
 import { ThemeSupa } from '@supabase/auth-ui-shared'
 import { supabase } from '../lib/supabase'
 import { useTheme } from '../context/ThemeContext'
-import { FrogIcon } from './FrogIcon'
+
 
 export const Auth: React.FC = () => {
   const { isDark } = useTheme()
@@ -20,11 +20,15 @@ export const Auth: React.FC = () => {
     <div className="min-h-screen flex items-center justify-center px-4" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-4 mb-2">
-            <h1 className="text-4xl font-bold" style={{ color: 'var(--color-text)' }}>
+          <div className="mb-6">
+            <img 
+              src="/logo_transparent.png" 
+              alt="Prompt-D Logo" 
+              className="mx-auto w-24 h-24 object-contain mb-4"
+            />
+            <h1 className="text-4xl font-bold gradient-text">
               Prompt.d
             </h1>
-            <FrogIcon size={40} className="flex-shrink-0" />
           </div>
           <p style={{ color: 'var(--color-text-secondary)' }}>
             Your personal prompt journal
