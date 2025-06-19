@@ -33,6 +33,8 @@ interface WeekData {
 interface WeeklyGalleryProps {
   currentUser?: SupabaseUser | null
   onDeletePick?: (pickId: string) => void
+  onToggleFullscreen?: () => void
+  isFullscreen?: boolean
 }
 
 const categories = [
@@ -42,7 +44,12 @@ const categories = [
   { id: 'other', label: 'Other', color: '#dc2626' },
 ]
 
-export const WeeklyGallery: React.FC<WeeklyGalleryProps> = ({ currentUser, onDeletePick }) => {
+export const WeeklyGallery: React.FC<WeeklyGalleryProps> = ({ 
+  currentUser, 
+  onDeletePick, 
+  onToggleFullscreen, 
+  isFullscreen 
+}) => {
   const [weeks, setWeeks] = useState<WeekData[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedWeek, setSelectedWeek] = useState<WeekData | null>(null)
@@ -244,7 +251,28 @@ export const WeeklyGallery: React.FC<WeeklyGalleryProps> = ({ currentUser, onDel
       <div className={`transition-all duration-300 ${isDrawerOpen ? 'flex-1 pr-4' : 'w-full'}`}>
         <div className="p-6">
           {/* Header */}
-          <div className="text-center mb-8">
+          <div className="text-center mb-8 relative">
+            {onToggleFullscreen && (
+              <button
+                onClick={onToggleFullscreen}
+                className="absolute top-0 right-0 p-3 rounded-lg transition-colors"
+                style={{ 
+                  color: 'var(--color-text-muted)',
+                  backgroundColor: 'var(--color-bg-secondary)'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.color = 'var(--color-text)'
+                  e.currentTarget.style.backgroundColor = 'var(--color-accent-bg)'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.color = 'var(--color-text-muted)'
+                  e.currentTarget.style.backgroundColor = 'var(--color-bg-secondary)'
+                }}
+                title={isFullscreen ? "Exit fullscreen" : "Expand to fullscreen"}
+              >
+                {isFullscreen ? '✕' : '⛶'}
+              </button>
+            )}
             <h2 className="text-3xl font-bold mb-3" style={{ color: 'var(--color-text)' }}>
               Past Weeks Gallery
             </h2>

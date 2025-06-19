@@ -1,8 +1,26 @@
-# Prompt.d
+<div align="center">
 
-A beautiful prompt journal application with ChatGPT-like interface, built with React, TypeScript, and Supabase.
+# 🐸 Prompt.d
+
+<img src="public/favicon.svg" alt="Prompt.d Frog Logo" width="80" height="80">
+
+*A beautiful prompt journal application with ChatGPT-like interface, built with React, TypeScript, and Supabase.*
 
 ![Prompt.d Screenshot](https://via.placeholder.com/800x400/6366f1/ffffff?text=Prompt.d+Screenshot)
+
+</div>
+
+## 🐸 Meet Our Hieroglyphic Frog Mascot
+
+Prompt.d features a unique **hieroglyphic-style frog logo** that embodies the essence of transformation and thoughtful reflection:
+
+- **🏺 Ancient Inspiration** - Clean, minimal line art inspired by Egyptian hieroglyphics
+- **🎨 Theme-Adaptive** - Automatically matches your chosen color theme (purple, blue, desert)
+- **📱 Universal Recognition** - Instantly recognizable across all screen sizes and contexts
+- **💭 Symbolic Meaning** - Frogs represent transformation, just like how prompts transform thoughts into action
+- **⚡ Modern Minimalism** - Simple geometric shapes that feel both timeless and contemporary
+
+The frog appears throughout the app as a friendly companion in your journaling journey, from the browser tab favicon to the main interface headers.
 
 ## ✨ Features
 

@@ -5,12 +5,6 @@
       <stop offset="0%" style="stop-color:#667eea"/>
       <stop offset="100%" style="stop-color:#764ba2"/>
     </linearGradient>
-    
-    <!-- Subtle inner glow -->
-    <linearGradient id="innerGlow" x1="20%" y1="20%" x2="80%" y2="80%">
-      <stop offset="0%" style="stop-color:#8b94ff"/>
-      <stop offset="100%" style="stop-color:#9c7bc7"/>
-    </linearGradient>
   </defs>
   
   <!-- Background circle with gradient -->
@@ -19,13 +13,146 @@
   <!-- Inner highlight circle -->
   <circle cx="16" cy="16" r="13" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/>
   
-  <!-- Main "P" letterform -->
-  <path d="M 10 8 L 10 24 L 12.5 24 L 12.5 17 L 18 17 C 20.5 17 22.5 15 22.5 12.5 C 22.5 10 20.5 8 18 8 Z M 12.5 10.5 L 18 10.5 C 19.1 10.5 20 11.4 20 12.5 C 20 13.6 19.1 14.5 18 14.5 L 12.5 14.5 Z" fill="white" opacity="0.95"/>
+  <!-- Hieroglyphic-style frog with horizontal tongue -->
   
-  <!-- Decorative dots representing "picks" -->
-  <circle cx="24" cy="12" r="1.5" fill="rgba(255,255,255,0.4)"/>
-  <circle cx="26" cy="16" r="1" fill="rgba(255,255,255,0.3)"/>
-  <circle cx="24" cy="20" r="0.8" fill="rgba(255,255,255,0.25)"/>
+  <!-- Main body - wider, more frog-like -->
+  <ellipse 
+    cx="16" 
+    cy="20" 
+    rx="7" 
+    ry="5" 
+    fill="none" 
+    stroke="white" 
+    stroke-width="2"
+    stroke-linecap="round"
+  />
+  
+  <!-- Head - larger, more prominent -->
+  <ellipse 
+    cx="16" 
+    cy="13" 
+    rx="5.5" 
+    ry="4.5" 
+    fill="none" 
+    stroke="white" 
+    stroke-width="2"
+  />
+  
+  <!-- Bulging eyes on top of head - classic frog feature -->
+  <circle 
+    cx="13" 
+    cy="9" 
+    r="2.5" 
+    fill="none" 
+    stroke="white" 
+    stroke-width="2"
+  />
+  <circle 
+    cx="19" 
+    cy="9" 
+    r="2.5" 
+    fill="none" 
+    stroke="white" 
+    stroke-width="2"
+  />
+  
+  <!-- Eye pupils -->
+  <circle 
+    cx="13" 
+    cy="9" 
+    r="1.2" 
+    fill="white"
+  />
+  <circle 
+    cx="19" 
+    cy="9" 
+    r="1.2" 
+    fill="white"
+  />
+  
+  <!-- Eye highlights for life -->
+  <circle cx="13.5" cy="8.5" r="0.5" fill="url(#mainGradient)" />
+  <circle cx="19.5" cy="8.5" r="0.5" fill="url(#mainGradient)" />
+  
+  <!-- Mouth opening -->
+  <ellipse 
+    cx="12" 
+    cy="15" 
+    rx="1.5" 
+    ry="1" 
+    fill="none" 
+    stroke="white" 
+    stroke-width="1.5"
+  />
+  
+  <!-- Horizontal tongue sticking out -->
+  <path 
+    d="M 10.5 15 Q 7 15 4 15" 
+    fill="none" 
+    stroke="white" 
+    stroke-width="2" 
+    stroke-linecap="round"
+  />
+  
+  <!-- Tongue tip -->
+  <circle 
+    cx="4" 
+    cy="15" 
+    r="1" 
+    fill="white"
+  />
+  
+  <!-- Front legs - more defined -->
+  <path 
+    d="M 11 18 C 9 19 7 20 6 21" 
+    fill="none" 
+    stroke="white" 
+    stroke-width="2" 
+    stroke-linecap="round"
+  />
+  <path 
+    d="M 21 18 C 23 19 25 20 26 21" 
+    fill="none" 
+    stroke="white" 
+    stroke-width="2" 
+    stroke-linecap="round"
+  />
+  
+  <!-- Back legs - webbed feet -->
+  <path 
+    d="M 12 23 C 10 24 8 25 7 26" 
+    fill="none" 
+    stroke="white" 
+    stroke-width="2" 
+    stroke-linecap="round"
+  />
+  <path 
+    d="M 20 23 C 22 24 24 25 25 26" 
+    fill="none" 
+    stroke="white" 
+    stroke-width="2" 
+    stroke-linecap="round"
+  />
+  
+  <!-- Webbed foot details -->
+  <path 
+    d="M 6 26 L 7 25.5 L 8 26" 
+    fill="none" 
+    stroke="white" 
+    stroke-width="1" 
+    stroke-linecap="round"
+  />
+  <path 
+    d="M 24 26 L 25 25.5 L 26 26" 
+    fill="none" 
+    stroke="white" 
+    stroke-width="1" 
+    stroke-linecap="round"
+  />
+  
+  <!-- Nostrils - more prominent -->
+  <circle cx="15" cy="12" r="0.4" fill="white" />
+  <circle cx="17" cy="12" r="0.4" fill="white" />
   
   <!-- Subtle inner shadow/depth -->
   <circle cx="16" cy="16" r="15" fill="none" stroke="rgba(0,0,0,0.1)" stroke-width="0.5"/>

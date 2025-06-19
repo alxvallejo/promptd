@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { Send, Copy, Edit3, Trash2 } from 'lucide-react'
 import { AppearanceSettings } from './AppearanceSettings'
+import { FrogIcon } from './FrogIcon'
 
 interface Message {
   id: string
@@ -221,9 +222,12 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         ) : messages.length === 0 && !activePrompt ? (
           <div className="flex items-center justify-center h-full">
             <div className="text-center max-w-md">
-              <h3 className="text-2xl font-bold mb-4" style={{ color: 'var(--color-text)' }}>
-                Welcome to Prompt.d
-              </h3>
+              <div className="flex items-center justify-center gap-3 mb-4">
+                <h3 className="text-2xl font-bold" style={{ color: 'var(--color-text)' }}>
+                  Welcome to Prompt.d
+                </h3>
+                <FrogIcon size={32} className="flex-shrink-0" />
+              </div>
               <p className="text-lg mb-6" style={{ color: 'var(--color-text-secondary)' }}>
                 Your personal prompt journal
               </p>

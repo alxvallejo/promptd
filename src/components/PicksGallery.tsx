@@ -33,6 +33,8 @@ interface PicksGalleryProps {
   onDeletePick?: (pickId: string) => void
   isExpanded?: boolean
   onToggleExpanded?: () => void
+  onToggleFullscreen?: () => void
+  isFullscreen?: boolean
 }
 
 const categories = [
@@ -42,7 +44,13 @@ const categories = [
   { id: 'other', label: 'Other', icon: MoreHorizontal },
 ]
 
-export const PicksGallery: React.FC<PicksGalleryProps> = ({ currentWeek, currentUser, onDeletePick, isExpanded = false, onToggleExpanded }) => {
+export const PicksGallery: React.FC<PicksGalleryProps> = ({ 
+  currentWeek, 
+  currentUser, 
+  onDeletePick, 
+  isExpanded = false, 
+  onToggleExpanded
+}) => {
   const [picks, setPicks] = useState<Pick[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
@@ -334,10 +342,37 @@ export const PicksGallery: React.FC<PicksGalleryProps> = ({ currentWeek, current
   return (
     <div className="flex h-full">
       {/* Main Gallery Area */}
-      <div className={`transition-all duration-300 ${isDrawerOpen ? 'flex-1 pr-4' : 'w-full'}`}>
+      <div className={`transition-all duration-300 ${isDrawerOpen ? 'flex-1 pr-4' : 'w-full'} relative`}>
+        {/* Filter Toggle - Top Right */}
+        <button
+          onClick={() => setFiltersExpanded(!filtersExpanded)}
+          className="absolute top-2 right-2 p-2 rounded-lg transition-colors z-10"
+          style={{
+            color: 'var(--color-text-muted)',
+            backgroundColor: 'var(--color-bg-tertiary)',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.color = 'var(--color-text)'
+            e.currentTarget.style.backgroundColor = 'var(--color-accent-bg)'
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.color = 'var(--color-text-muted)'
+            e.currentTarget.style.backgroundColor = 'var(--color-bg-tertiary)'
+          }}
+          title="Filter gallery"
+        >
+          <Filter size={18} />
+          {(selectedCategory || selectedUser) && (
+            <div 
+              className="absolute -top-1 -right-1 w-3 h-3 rounded-full"
+              style={{ backgroundColor: 'var(--color-accent)' }}
+            />
+          )}
+        </button>
+        
         <div className="space-y-6">
           {/* Header */}
-          <div className="text-center mb-8 relative">
+          <div className="text-center mb-8 pt-8 relative">
             {onToggleExpanded && (
               <button
                 onClick={onToggleExpanded}
@@ -359,6 +394,7 @@ export const PicksGallery: React.FC<PicksGalleryProps> = ({ currentWeek, current
                 {isExpanded ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
               </button>
             )}
+            
             <h3 className="text-3xl font-bold mb-3 flex items-center gap-3 justify-center" style={{ color: 'var(--color-text)' }}>
               <Users size={32} style={{ color: 'var(--color-accent)' }} />
               Gallery
@@ -369,176 +405,187 @@ export const PicksGallery: React.FC<PicksGalleryProps> = ({ currentWeek, current
             <div className="mt-4 mx-auto w-24 h-1 rounded-full" style={{ backgroundColor: 'var(--color-accent)' }}></div>
           </div>
 
-          {/* Filters Toggle */}
-          <div className="mb-4">
-            <div className="flex items-center justify-center">
-              <button
-                onClick={() => setFiltersExpanded(!filtersExpanded)}
-                className="flex items-center gap-3 px-6 py-3 rounded-full transition-all duration-200 shadow-sm hover:shadow-md"
-                style={{
-                  background: 'var(--color-bg)',
-                  color: 'var(--color-text)',
-                  border: `2px solid var(--color-border)`,
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = 'var(--color-accent)'
-                  e.currentTarget.style.backgroundColor = 'var(--color-bg-tertiary)'
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = 'var(--color-border)'
-                  e.currentTarget.style.backgroundColor = 'var(--color-bg)'
-                }}
-              >
-                <Filter size={18} />
-                <span className="font-medium">Filters</span>
-                <div className="flex items-center gap-1">
-                  {(selectedCategory || selectedUser) && (
-                    <span className="px-2 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-600">
-                      {(selectedCategory ? 1 : 0) + (selectedUser ? 1 : 0)}
-                    </span>
-                  )}
-                  {filtersExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                </div>
-              </button>
-            </div>
-          </div>
-
-          {/* Collapsible Filters */}
+          {/* Overlay Filters */}
           {filtersExpanded && (
-            <div className="mb-6 space-y-6">
-              {/* Category Filters */}
-              <div>
-                <div className="flex items-center justify-center gap-2 mb-4">
-                  <span className="text-sm font-medium" style={{ color: 'var(--color-text-secondary)' }}>🏷️ Categories</span>
-                </div>
-                <div className="flex gap-3 flex-wrap justify-center">
-                  <button
-                    onClick={() => setSelectedCategory(null)}
-                    className={`flex items-center gap-2 px-4 py-3 rounded-full transition-all duration-200 shadow-sm hover:shadow-md ${
-                      selectedCategory === null ? 'active' : ''
-                    }`}
-                    style={{
-                      background: selectedCategory === null 
-                        ? 'linear-gradient(135deg, var(--color-accent), var(--color-accent-dark))' 
-                        : 'var(--color-bg)',
-                      color: selectedCategory === null ? 'white' : 'var(--color-text-secondary)',
-                      border: `2px solid ${selectedCategory === null ? 'var(--color-accent)' : 'var(--color-border)'}`,
-                    }}
-                  >
-                    <span className="text-lg">✨</span>
-                    <span className={`px-2 py-1 rounded-full text-xs font-bold ${
-                      selectedCategory === null 
-                        ? 'bg-black/20 text-white' 
-                        : 'bg-gray-100 text-gray-600'
-                    }`}>
-                      {picks.length}
-                    </span>
-                  </button>
-                  
-                  {categories.map((category) => {
-                    const Icon = category.icon
-                    const count = getPicksCount(category.id)
-                    const isSelected = selectedCategory === category.id
-                    
-                    return (
-                      <button
-                        key={category.id}
-                        onClick={() => setSelectedCategory(category.id)}
-                        className={`flex items-center gap-2 px-4 py-3 rounded-full transition-all duration-200 shadow-sm hover:shadow-md ${
-                          isSelected ? 'active' : ''
-                        }`}
-                        style={{
-                          background: isSelected 
-                            ? 'linear-gradient(135deg, var(--color-accent), var(--color-accent-dark))' 
-                            : 'var(--color-bg)',
-                          color: isSelected ? 'white' : 'var(--color-text-secondary)',
-                          border: `2px solid ${isSelected ? 'var(--color-accent)' : 'var(--color-border)'}`,
-                          opacity: count === 0 ? 0.5 : 1,
-                        }}
-                        disabled={count === 0}
-                      >
-                        <Icon size={18} />
-                        <span className={`px-2 py-1 rounded-full text-xs font-bold ${
-                          isSelected 
-                            ? 'bg-black/20 text-white' 
-                            : 'bg-gray-100 text-gray-600'
-                        }`}>
-                          {count}
-                        </span>
-                      </button>
-                    )
-                  })}
-                </div>
-              </div>
-
-              {/* User Filters */}
-              {getUniqueUsers().length > 0 && (
-                <div>
-                  <div className="flex items-center justify-center gap-2 mb-4">
-                    <span className="text-sm font-medium" style={{ color: 'var(--color-text-secondary)' }}>👥 Contributors</span>
-                  </div>
-                  <div className="flex gap-3 flex-wrap justify-center">
+            <>
+              {/* Backdrop */}
+              <div 
+                className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40"
+                onClick={() => setFiltersExpanded(false)}
+              />
+              
+              {/* Filter Panel */}
+              <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-4xl mx-4">
+                <div 
+                  className="rounded-2xl shadow-2xl border p-8 space-y-6 max-h-[80vh] overflow-y-auto"
+                  style={{
+                    backgroundColor: 'var(--color-bg)',
+                    borderColor: 'var(--color-border)',
+                  }}
+                >
+                  {/* Close Button */}
+                  <div className="flex justify-between items-center mb-6">
+                    <h4 className="text-2xl font-bold" style={{ color: 'var(--color-text)' }}>
+                      Filter Gallery
+                    </h4>
                     <button
-                      onClick={() => setSelectedUser(null)}
-                      className={`flex items-center gap-2 px-4 py-3 rounded-full transition-all duration-200 shadow-sm hover:shadow-md ${
-                        selectedUser === null ? 'active' : ''
-                      }`}
-                      style={{
-                        background: selectedUser === null 
-                          ? 'linear-gradient(135deg, #10b981, #059669)' 
-                          : 'var(--color-bg)',
-                        color: selectedUser === null ? 'white' : 'var(--color-text-secondary)',
-                        border: `2px solid ${selectedUser === null ? '#10b981' : 'var(--color-border)'}`,
+                      onClick={() => setFiltersExpanded(false)}
+                      className="p-2 rounded-full transition-colors"
+                      style={{ 
+                        color: 'var(--color-text-muted)',
+                        backgroundColor: 'var(--color-bg-tertiary)'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.color = 'var(--color-text)'
+                        e.currentTarget.style.backgroundColor = 'var(--color-accent-bg)'
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.color = 'var(--color-text-muted)'
+                        e.currentTarget.style.backgroundColor = 'var(--color-bg-tertiary)'
                       }}
                     >
-                      <span className="text-lg">👥</span>
-                      <span className={`px-2 py-1 rounded-full text-xs font-bold ${
-                        selectedUser === null 
-                          ? 'bg-black/20 text-white' 
-                          : 'bg-gray-100 text-gray-600'
-                      }`}>
-                        {getUniqueUsers().length}
-                      </span>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                      </svg>
                     </button>
-                    {getUniqueUsers().map((user) => (
+                  </div>
+
+                  {/* Category Filters */}
+                  <div>
+                    <div className="flex items-center gap-2 mb-4">
+                      <span className="text-lg font-semibold" style={{ color: 'var(--color-text)' }}>🏷️ Categories</span>
+                    </div>
+                    <div className="flex gap-3 flex-wrap">
                       <button
-                        key={user.id}
-                        onClick={() => setSelectedUser(user.id)}
+                        onClick={() => setSelectedCategory(null)}
                         className={`flex items-center gap-2 px-4 py-3 rounded-full transition-all duration-200 shadow-sm hover:shadow-md ${
-                          selectedUser === user.id ? 'active' : ''
+                          selectedCategory === null ? 'active' : ''
                         }`}
                         style={{
-                          background: selectedUser === user.id 
-                            ? 'linear-gradient(135deg, #10b981, #059669)' 
-                            : 'var(--color-bg)',
-                          color: selectedUser === user.id ? 'white' : 'var(--color-text-secondary)',
-                          border: `2px solid ${selectedUser === user.id ? '#10b981' : 'var(--color-border)'}`,
+                          background: selectedCategory === null 
+                            ? 'linear-gradient(135deg, var(--color-accent), var(--color-accent-dark))' 
+                            : 'var(--color-bg-secondary)',
+                          color: selectedCategory === null ? 'white' : 'var(--color-text-secondary)',
+                          border: `2px solid ${selectedCategory === null ? 'var(--color-accent)' : 'var(--color-border)'}`,
                         }}
                       >
-                        <div 
-                          className="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold"
-                          style={{ 
-                            background: selectedUser === user.id 
-                              ? 'rgba(0,0,0,0.2)' 
-                              : 'linear-gradient(135deg, #6366f1, #8b5cf6)' 
-                          }}
-                        >
-                          {user.name.charAt(0).toUpperCase()}
-                        </div>
-                        <span className="max-w-20 truncate font-medium">{user.name}</span>
+                        <span className="text-lg">✨</span>
                         <span className={`px-2 py-1 rounded-full text-xs font-bold ${
-                          selectedUser === user.id 
+                          selectedCategory === null 
                             ? 'bg-black/20 text-white' 
                             : 'bg-gray-100 text-gray-600'
                         }`}>
-                          {user.count}
+                          {picks.length}
                         </span>
                       </button>
-                    ))}
+                      
+                      {categories.map((category) => {
+                        const Icon = category.icon
+                        const count = getPicksCount(category.id)
+                        const isSelected = selectedCategory === category.id
+                        
+                        return (
+                          <button
+                            key={category.id}
+                            onClick={() => setSelectedCategory(category.id)}
+                            className={`flex items-center gap-2 px-4 py-3 rounded-full transition-all duration-200 shadow-sm hover:shadow-md ${
+                              isSelected ? 'active' : ''
+                            }`}
+                            style={{
+                              background: isSelected 
+                                ? 'linear-gradient(135deg, var(--color-accent), var(--color-accent-dark))' 
+                                : 'var(--color-bg-secondary)',
+                              color: isSelected ? 'white' : 'var(--color-text-secondary)',
+                              border: `2px solid ${isSelected ? 'var(--color-accent)' : 'var(--color-border)'}`,
+                              opacity: count === 0 ? 0.5 : 1,
+                            }}
+                            disabled={count === 0}
+                          >
+                            <Icon size={18} />
+                            <span className={`px-2 py-1 rounded-full text-xs font-bold ${
+                              isSelected 
+                                ? 'bg-black/20 text-white' 
+                                : 'bg-gray-100 text-gray-600'
+                            }`}>
+                              {count}
+                            </span>
+                          </button>
+                        )
+                      })}
+                    </div>
                   </div>
+
+                  {/* User Filters */}
+                  {getUniqueUsers().length > 0 && (
+                    <div>
+                      <div className="flex items-center gap-2 mb-4">
+                        <span className="text-lg font-semibold" style={{ color: 'var(--color-text)' }}>👥 Contributors</span>
+                      </div>
+                      <div className="flex gap-3 flex-wrap">
+                        <button
+                          onClick={() => setSelectedUser(null)}
+                          className={`flex items-center gap-2 px-4 py-3 rounded-full transition-all duration-200 shadow-sm hover:shadow-md ${
+                            selectedUser === null ? 'active' : ''
+                          }`}
+                          style={{
+                            background: selectedUser === null 
+                              ? 'linear-gradient(135deg, #10b981, #059669)' 
+                              : 'var(--color-bg-secondary)',
+                            color: selectedUser === null ? 'white' : 'var(--color-text-secondary)',
+                            border: `2px solid ${selectedUser === null ? '#10b981' : 'var(--color-border)'}`,
+                          }}
+                        >
+                          <span className="text-lg">👥</span>
+                          <span className={`px-2 py-1 rounded-full text-xs font-bold ${
+                            selectedUser === null 
+                              ? 'bg-black/20 text-white' 
+                              : 'bg-gray-100 text-gray-600'
+                          }`}>
+                            {getUniqueUsers().length}
+                          </span>
+                        </button>
+                        {getUniqueUsers().map((user) => (
+                          <button
+                            key={user.id}
+                            onClick={() => setSelectedUser(user.id)}
+                            className={`flex items-center gap-2 px-4 py-3 rounded-full transition-all duration-200 shadow-sm hover:shadow-md ${
+                              selectedUser === user.id ? 'active' : ''
+                            }`}
+                            style={{
+                              background: selectedUser === user.id 
+                                ? 'linear-gradient(135deg, #10b981, #059669)' 
+                                : 'var(--color-bg-secondary)',
+                              color: selectedUser === user.id ? 'white' : 'var(--color-text-secondary)',
+                              border: `2px solid ${selectedUser === user.id ? '#10b981' : 'var(--color-border)'}`,
+                            }}
+                          >
+                            <div 
+                              className="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold"
+                              style={{ 
+                                background: selectedUser === user.id 
+                                  ? 'rgba(0,0,0,0.2)' 
+                                  : 'linear-gradient(135deg, #6366f1, #8b5cf6)' 
+                              }}
+                            >
+                              {user.name.charAt(0).toUpperCase()}
+                            </div>
+                            <span className="max-w-20 truncate font-medium">{user.name}</span>
+                            <span className={`px-2 py-1 rounded-full text-xs font-bold ${
+                              selectedUser === user.id 
+                                ? 'bg-black/20 text-white' 
+                                : 'bg-gray-100 text-gray-600'
+                            }`}>
+                              {user.count}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
+              </div>
+            </>
           )}
 
           {/* Gallery Grid */}

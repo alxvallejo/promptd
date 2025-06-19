@@ -27,6 +27,8 @@ interface PicksProps {
   onSavePick: (pick: { category: string; content: string; linkPreviews: LinkPreview[]; weekOf: string }) => void
   onDeletePick?: (pickId: string) => void
   currentUser?: User | null
+  onToggleFullscreen?: () => void
+  isFullscreen?: boolean
 }
 
 const categories = [
@@ -36,7 +38,13 @@ const categories = [
   { id: 'other', label: 'Other', icon: MoreHorizontal, placeholder: 'What else are you picking this week? Share your choice...' },
 ]
 
-export const Picks: React.FC<PicksProps> = ({ onSavePick, onDeletePick, currentUser }) => {
+export const Picks: React.FC<PicksProps> = ({ 
+  onSavePick, 
+  onDeletePick, 
+  currentUser,
+  onToggleFullscreen,
+  isFullscreen
+}) => {
   const [selectedCategory, setSelectedCategory] = useState('movies-tv')
   const [inputValue, setInputValue] = useState('')
   const [linkPreviews, setLinkPreviews] = useState<LinkPreview[]>([])
@@ -844,6 +852,8 @@ export const Picks: React.FC<PicksProps> = ({ onSavePick, onDeletePick, currentU
             onDeletePick={onDeletePick}
             isExpanded={isGalleryExpanded}
             onToggleExpanded={() => setIsGalleryExpanded(!isGalleryExpanded)}
+            onToggleFullscreen={onToggleFullscreen}
+            isFullscreen={isFullscreen}
           />
         </div>
       </div>

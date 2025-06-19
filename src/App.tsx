@@ -449,11 +449,22 @@ const AppContent: React.FC = () => {
     }
     
     if (showPicks) {
-      return <Picks onSavePick={handleSavePick} onDeletePick={handleDeletePick} currentUser={user} />
+      return (
+        <Picks 
+          onSavePick={handleSavePick} 
+          onDeletePick={handleDeletePick} 
+          currentUser={user}
+        />
+      )
     }
     
     if (showPastPics) {
-      return <PastPics currentUser={user} onDeletePick={handleDeletePick} />
+      return (
+        <PastPics 
+          currentUser={user} 
+          onDeletePick={handleDeletePick}
+        />
+      )
     }
     
     return (

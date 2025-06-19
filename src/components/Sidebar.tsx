@@ -4,6 +4,7 @@ import { Sparkle, Archive } from 'phosphor-react'
 import { useAuth } from '../context/AuthContext'
 import { useTheme } from '../context/ThemeContext'
 import { supabase } from '../lib/supabase'
+import { BookmarkButton } from './BookmarkButton'
 
 interface SidebarProps {
   folders: Array<{ id: string; name: string }>
@@ -74,10 +75,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
       borderRight: '1px solid var(--color-border)' 
     }}>
       {/* Header */}
-      <div className="p-4" style={{ borderBottom: '1px solid var(--color-border)' }}>
-        <h1 className="text-xl font-semibold" style={{ color: 'var(--color-text)' }}>
-          Prompt.d
-        </h1>
+      <div className="p-6" style={{ borderBottom: '1px solid var(--color-border)' }}>
+        <div className="flex items-center gap-4">
+          <img 
+            src="/logo.png" 
+            alt="Prompt-D Logo" 
+            className="w-16 h-16 flex-shrink-0 object-contain"
+          />
+          <h1 className="text-3xl font-bold" style={{ color: 'var(--color-text)' }}>
+            Prompt.d
+          </h1>
+        </div>
       </div>
 
       {/* New Prompt Button */}
@@ -164,6 +172,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* Bottom Actions */}
       <div className="p-6 pb-8" style={{ borderTop: '1px solid var(--color-border)' }}>
         <div className="space-y-2">
+          <BookmarkButton className="w-full" />
+          
           <button
             onClick={toggleTheme}
             className="sidebar-item w-full"
