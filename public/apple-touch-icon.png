@@ -1,1 +1,12 @@
- 
+<!-- 
+Apple Touch Icon Placeholder (180x180 PNG)
+
+To create the actual apple-touch-icon.png:
+1. Use the favicon.svg as a base
+2. Visit https://favicon.io/favicon-converter/
+3. Upload favicon.svg and select "Apple touch icon" format
+4. Download the 180x180 PNG file
+5. Replace this file with apple-touch-icon.png
+
+This icon is used when users add your web app to their iPhone/iPad home screen.
+--> 

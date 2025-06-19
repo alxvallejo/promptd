@@ -1,1 +1,11 @@
- 
+<!-- 
+16x16 Favicon PNG Placeholder
+
+To create favicon-16x16.png:
+1. Visit https://favicon.io/favicon-converter/
+2. Upload the favicon.svg file
+3. Download the 16x16 PNG from the generated package
+4. Replace this file with favicon-16x16.png
+
+This provides better compatibility with older browsers.
+--> 
