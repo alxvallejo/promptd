@@ -65,7 +65,7 @@ export const searchIMDBById = async (imdbId: string): Promise<IMDBSearchResult |
       plot: 'short'
     })
     
-    const response = await fetch(`http://www.omdbapi.com/?${params}`)
+    const response = await fetch(`https://www.omdbapi.com/?${params}`)
     
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`)
