@@ -71,27 +71,48 @@ export const fetchGeneralLinkPreview = async (url: string): Promise<LinkPreviewD
       return await fetchSteamPreview(url)
     }
     
-    // For Wikipedia, use their REST API as it's more reliable
-    if (url.includes('wikipedia.org')) {
-      return await fetchWikipediaPreview(url)
-    }
-    
-    // For other general websites, use meta tag extraction
+    // For all general websites including Wikipedia, use meta tag extraction
     try {
-      const corsProxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`
-      const response = await fetch(corsProxyUrl)
+      // Try different CORS proxy endpoints
+      const corsProxies = [
+        `https://corsproxy.io/?${encodeURIComponent(url)}`,
+        `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+        `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`
+      ]
       
-      if (response.ok) {
-        const data = await response.json()
-        const preview = extractMetaTags(data.contents, url)
-        
-        // If we got valid metadata, return it
-        if (preview.title && preview.title !== 'Link Preview') {
-          return preview
+      for (const proxyUrl of corsProxies) {
+        try {
+          const response = await fetch(proxyUrl, {
+            headers: {
+              'Accept': 'text/html,application/xhtml+xml',
+            }
+          })
+          
+          if (response.ok) {
+            let htmlContent = ''
+            
+            // Handle different proxy response formats
+            if (proxyUrl.includes('allorigins.win/get')) {
+              const data = await response.json()
+              htmlContent = data.contents
+            } else {
+              htmlContent = await response.text()
+            }
+            
+            const preview = extractMetaTags(htmlContent, url)
+            
+            // If we got valid metadata, return it
+            if (preview.title && preview.title !== 'Link Preview' && preview.image) {
+              return preview
+            }
+          }
+        } catch (proxyError) {
+          console.log(`Proxy ${proxyUrl} failed, trying next...`, proxyError)
+          continue
         }
       }
     } catch (error) {
-      console.log('Meta tag extraction failed, using fallback:', error)
+      console.log('All CORS proxies failed, using fallback:', error)
     }
     
     // For other URLs, we'll create a basic preview
@@ -132,12 +153,11 @@ const fetchSteamPreview = async (url: string): Promise<LinkPreviewData> => {
       
       // Try using a CORS proxy for Steam API
       try {
-        const corsProxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(`https://store.steampowered.com/api/appdetails?appids=${appId}&format=json`)}`
+        const corsProxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(`https://store.steampowered.com/api/appdetails?appids=${appId}&format=json`)}`
         
         const response = await fetch(corsProxyUrl)
         if (response.ok) {
-          const proxyData = await response.json()
-          const steamData = JSON.parse(proxyData.contents)
+          const steamData = await response.json()
           const appData = steamData[appId]
           
           if (appData && appData.success && appData.data) {
@@ -177,50 +197,6 @@ const fetchSteamPreview = async (url: string): Promise<LinkPreviewData> => {
       title: 'Steam Game',
       description: 'Available on Steam',
       image: 'https://via.placeholder.com/300x200/1b2838/ffffff?text=Steam'
-    }
-  }
-}
-
-const fetchWikipediaPreview = async (url: string): Promise<LinkPreviewData> => {
-  try {
-    // Extract article title from URL
-    const urlParts = url.split('/wiki/')
-    if (urlParts.length < 2) {
-      throw new Error('Invalid Wikipedia URL')
-    }
-    
-    const articleTitle = decodeURIComponent(urlParts[1].split('#')[0])
-    const lang = url.match(/(?:https?:\/\/)?([a-z]+)\.wikipedia\.org/)?.[1] || 'en'
-    
-    // Use Wikipedia's REST API to get page summary
-    const apiUrl = `https://${lang}.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(articleTitle)}`
-    
-    const response = await fetch(apiUrl)
-    if (response.ok) {
-      const data = await response.json()
-      
-      return {
-        url,
-        title: data.title || articleTitle.replace(/_/g, ' '),
-        description: data.extract || data.description || 'Wikipedia article',
-        image: data.thumbnail?.source || data.originalimage?.source || 'https://via.placeholder.com/300x200/ffffff/000000?text=Wikipedia'
-      }
-    }
-    
-    // Fallback if API fails
-    return {
-      url,
-      title: articleTitle.replace(/_/g, ' '),
-      description: 'Wikipedia article',
-      image: 'https://via.placeholder.com/300x200/ffffff/000000?text=Wikipedia'
-    }
-  } catch (error) {
-    console.error('Error fetching Wikipedia preview:', error)
-    return {
-      url,
-      title: 'Wikipedia Article',
-      description: 'Encyclopedia article',
-      image: 'https://via.placeholder.com/300x200/ffffff/000000?text=Wikipedia'
     }
   }
 }
