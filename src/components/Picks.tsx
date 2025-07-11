@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { Send, Film, Gamepad2, Camera, MoreHorizontal, X, ExternalLink, Star, Eye, Edit3, AlertTriangle } from 'lucide-react'
+import { Send, Film, Gamepad2, Camera, MoreHorizontal, X, ExternalLink, Star, Eye, Edit3, AlertTriangle, Link } from 'lucide-react'
 import { PicksGallery } from './PicksGallery'
 import { extractIMDBId, searchIMDBById, createIMDBLinkPreview } from '../lib/imdbSearch'
 import { fetchGeneralLinkPreview } from '../lib/linkPreview'
@@ -35,6 +35,7 @@ const categories = [
   { id: 'movies-tv', label: 'Movies & TV', icon: Film, placeholder: 'What movie or TV show are you picking this week? Share a link or describe your choice...' },
   { id: 'games', label: 'Video Games', icon: Gamepad2, placeholder: 'What game are you playing this week? Drop a link or describe your gaming pick...' },
   { id: 'activities', label: 'Pics', icon: Camera, placeholder: 'Share your photos and memories from this week! Drag & drop images or share details...' },
+  { id: 'links', label: 'Links', icon: Link, placeholder: 'Share interesting links you found this week! Paste URLs to articles, websites, or any content worth sharing...' },
   { id: 'other', label: 'Other', icon: MoreHorizontal, placeholder: 'What else are you picking this week? Share your choice...' },
 ]
 

@@ -41,6 +41,7 @@ const categories = [
   { id: 'movies-tv', label: 'Movies & TV', color: '#e11d48' },
   { id: 'games', label: 'Video Games', color: '#7c3aed' },
   { id: 'activities', label: 'Pics', color: '#059669' },
+  { id: 'links', label: 'Links', color: '#2563eb' },
   { id: 'other', label: 'Other', color: '#dc2626' },
 ]
 
@@ -208,6 +209,7 @@ export const WeeklyGallery: React.FC<WeeklyGalleryProps> = ({
       'movies-tv': '🎬',
       'games': '🎮',
       'activities': '📸',
+      'links': '🔗',
       'other': '⭐'
     }
     return categoryMap[category as keyof typeof categoryMap] || '⭐'

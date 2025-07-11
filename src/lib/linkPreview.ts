@@ -5,6 +5,49 @@ interface LinkPreviewData {
   image?: string
 }
 
+// Extract meta tags from HTML content
+const extractMetaTags = (html: string, url: string): LinkPreviewData => {
+  const getMetaContent = (property: string): string | undefined => {
+    // Try different meta tag formats
+    const patterns = [
+      new RegExp(`<meta\\s+property=["']${property}["']\\s+content=["']([^"']+)["']`, 'i'),
+      new RegExp(`<meta\\s+content=["']([^"']+)["']\\s+property=["']${property}["']`, 'i'),
+      new RegExp(`<meta\\s+name=["']${property}["']\\s+content=["']([^"']+)["']`, 'i'),
+      new RegExp(`<meta\\s+content=["']([^"']+)["']\\s+name=["']${property}["']`, 'i')
+    ]
+    
+    for (const pattern of patterns) {
+      const match = html.match(pattern)
+      if (match) return match[1]
+    }
+    return undefined
+  }
+  
+  // Extract title from various sources
+  const ogTitle = getMetaContent('og:title')
+  const twitterTitle = getMetaContent('twitter:title')
+  const titleMatch = html.match(/<title>([^<]+)<\/title>/i)
+  const title = ogTitle || twitterTitle || titleMatch?.[1] || 'Link Preview'
+  
+  // Extract description
+  const ogDescription = getMetaContent('og:description')
+  const twitterDescription = getMetaContent('twitter:description')
+  const metaDescription = getMetaContent('description')
+  const description = ogDescription || twitterDescription || metaDescription || ''
+  
+  // Extract image
+  const ogImage = getMetaContent('og:image')
+  const twitterImage = getMetaContent('twitter:image')
+  const image = ogImage || twitterImage
+  
+  return {
+    url,
+    title: title.trim(),
+    description: description.trim(),
+    image
+  }
+}
+
 // For general link previews, we'll use a simple meta tag scraper
 // In production, you might want to use a service like linkpreview.net or implement server-side scraping
 export const fetchGeneralLinkPreview = async (url: string): Promise<LinkPreviewData> => {
@@ -26,6 +69,24 @@ export const fetchGeneralLinkPreview = async (url: string): Promise<LinkPreviewD
     // Add Steam support
     if (url.includes('store.steampowered.com')) {
       return await fetchSteamPreview(url)
+    }
+    
+    // For Wikipedia and other general websites, use meta tag extraction
+    try {
+      const corsProxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`
+      const response = await fetch(corsProxyUrl)
+      
+      if (response.ok) {
+        const data = await response.json()
+        const preview = extractMetaTags(data.contents, url)
+        
+        // If we got valid metadata, return it
+        if (preview.title && preview.title !== 'Link Preview') {
+          return preview
+        }
+      }
+    } catch (error) {
+      console.log('Meta tag extraction failed, using fallback:', error)
     }
     
     // For other URLs, we'll create a basic preview

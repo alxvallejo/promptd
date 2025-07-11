@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Film, Gamepad2, Calendar, MoreHorizontal, ExternalLink, User, Trash2, Presentation, X, ChevronLeft, ChevronRight, Star } from 'lucide-react'
+import { Film, Gamepad2, Calendar, MoreHorizontal, ExternalLink, User, Trash2, Presentation, X, ChevronLeft, ChevronRight, Star, Link } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import type { User as SupabaseUser } from '@supabase/supabase-js'
 
@@ -34,6 +34,7 @@ const categories = [
   { id: 'movies-tv', label: 'Movies & TV', icon: Film },
   { id: 'games', label: 'Video Games', icon: Gamepad2 },
   { id: 'activities', label: 'Activities', icon: Calendar },
+  { id: 'links', label: 'Links', icon: Link },
   { id: 'other', label: 'Other', icon: MoreHorizontal },
 ]
 
